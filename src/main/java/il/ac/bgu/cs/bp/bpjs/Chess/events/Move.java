@@ -5,7 +5,7 @@ package il.ac.bgu.cs.bp.bpjs.Chess.events;
  */
 
 import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
-import org.apache.commons.lang3.NotImplementedException;
+//import org.apache.commons.lang3.NotImplementedException;
 
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 

@@ -2,6 +2,7 @@ package il.ac.bgu.cs.bp.bpjs.Chess.events;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
+//import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 
 /**
  * Created by Ronit on 04-Nov-18.
