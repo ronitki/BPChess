@@ -8,16 +8,35 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.Pieces);
 
 
-var initRookMove = bp.EventSet("Rook Move events", function (e) {
-    var ans = false;
+var isRookMove = bp.EventSet("Rook Move events", function (e) {
+
     if (e instanceof AMove)
-        ans =  e.getPiece().getType() == Piece.Type.rook;
-    bp.log.info(ans);
-    bp.log.info(e);
-    return ans;
+       return  e.getPiece().getType() == Piece.Type.rook;
+return false;
+
+});
+var isKingMove = bp.EventSet("King Move events", function (e) {
+
+    if (e instanceof AMove)
+        return  e.getPiece().getType() == Piece.Type.king;
+    return false;
+
+});
+var isWhiteMove = bp.EventSet("White Move events", function (e) {
+
+    if (e instanceof AMove)
+        return  e.getPiece().getColor() == Piece.Color.white;
+    return false;
 
 });
 
+var isIllegal= bp.EventSet("Illegal Moves", function(e){
+
+    if(e instanceof AMove)
+        return (e.getTargetX()<0 || e.getTargetX()>7 || e.getTargetY()<0 || e.getTargetY()>7);
+    return false;
+
+})
 
 //
 // var coldEvent = bp.Event("coldEvent");
@@ -44,8 +63,17 @@ bp.registerBThread("init_Start_thread",function(){
 });
 
 
+bp.registerBThread("block illegal moves", function () {
+    while (true) {
+
+        bp.sync({block: isIllegal});
+    }
+
+})
+
 bp.registerBThread("move rook",function () {
-    var move = bp.sync({waitFor: initRookMove});
+    var move = bp.sync({waitFor: isRookMove});
+    bp.sync({waitFor:bp.Event("game_start")});
     while(true) {
         move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 2,
                 move.getTargetY(), move.getPiece())});
