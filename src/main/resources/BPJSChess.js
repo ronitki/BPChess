@@ -131,6 +131,21 @@ bp.registerBThread("move rook",function () {
         ]});
 
 });
+bp.registerBThread("move king",function () {
+    var move = bp.sync({waitFor: isKingMove});
+    bp.sync({waitFor:bp.Event("game_start")});
+    while(true) {
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() -1 , move.getTargetY()-1, move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX()    , move.getTargetY()-1, move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() +1 , move.getTargetY()-1, move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() -1 , move.getTargetY()  , move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() +1 , move.getTargetY()  , move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() -1 , move.getTargetY()+1, move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX()    , move.getTargetY()+1, move.getPiece())});
+        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() +1 , move.getTargetY()+1, move.getPiece())});
+    }
+});
+
 
  bp.registerBThread("EnforceTurns", function() {
      bp.sync({waitFor:bp.Event("game_start")});
