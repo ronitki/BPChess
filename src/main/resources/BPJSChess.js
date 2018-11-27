@@ -14,6 +14,7 @@ var arrOfMoveTo=initArr();
 
 function createBpEventOfAmoveTo(i,j){
     var bpevent=bp.EventSet("AMove To_"+i+"_"+j, function (e) {
+        bp.log.info(e);
         if (e instanceof AMove) {
             return (e.getTargetX() == i && e.getTargetY() == j);
         }
@@ -45,7 +46,7 @@ function initBoard(){
             arrOfAMoveTo[i][j]=createBpEventOfAmoveTo(i,j);
             arrOfAMoveFrom[i][j]=createBpEventOfAmoveFrom(i,j);
             arrOfMoveTo[i][j]=createBpEventOfMoveTo(i,j);
-            bp.log.info(i);
+
             bp.registerBThread("block move to occupied cell_"+i+"_"+j, function() {
                 bp.sync({waitFor:bp.Event("game_start")});
                while(true) {
@@ -62,6 +63,9 @@ function initBoard(){
                 });
         }
     }
+    bp.registerBThread("finished board init", function () {
+    bp.sync({ request:bp.Event("done_init")});
+    });
 }
 function initArr(){
     var arr=[];
@@ -71,8 +75,7 @@ function initArr(){
     return arr;
 }
 
-initBoard();
-
+ //initBoard();
 var isMove =bp.EventSet("Move events", function (e) {
     return (e instanceof AMove);
 });
@@ -141,15 +144,13 @@ var isIllegal= bp.EventSet("Illegal Moves", function(e){
 
 // bp.log.info('Chess - Let the game begin!');
 
-bp.registerBThread("game_duration", function () {
-    // bp.sync({ request:bp.Event("init_start")});
-    // bp.sync({ waitFor:bp.Event("init_end")});
-    bp.sync({ request:bp.Event("game_start")});
-    // bp.sync({ waitFor:bp.Event("game_end")});
-
-
-
-});
+// bp.registerBThread("game_duration", function () {
+//     // bp.sync({ request:bp.Event("init_start")});
+//     // bp.sync({ waitFor:bp.Event("init_end")});
+//     bp.sync({ request:bp.Event("game_start")});
+//     // bp.sync({ waitFor:bp.Event("game_end")});
+//
+// });
 //
 // bp.registerBThread("init_Start_thread",function(){
 //     bp.sync({ waitFor:bp.Event("init_start")});
@@ -252,12 +253,33 @@ bp.registerBThread("game_duration", function () {
 //         bp.sync({block: isAmoveInPlace});
 //     }
 // });
+// var arr=initArr();
+// arr[0][0]=createBpEventOfAmoveTo(0,0);
+// arr[2][2]=createBpEventOfAmoveTo(2,2);
+arrOfAMoveTo[2][2]=createBpEventOfAmoveTo(2,2);
+arrOfAMoveFrom[2][2]=createBpEventOfAmoveFrom(2,2);
+bp.registerBThread("block move from empty cell_"+2+"_"+2, function() {
+    // bp.sync({waitFor: bp.Event("game_start")});
+    //      bp.sync({ request:Move(1,1,2,2,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
+// bp.log.info(arrOfAMoveTo[2][2]);
+     while (true) {
+         bp.sync({ request:Move(1,1,2,2,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
+    //     bp.sync({waitFor: arrOfAMoveTo[2][2], block: arrOfAMoveFrom[2][2]});
+    //     bp.sync({waitFor: arrOfAMoveTo[2][2]});
+     }
+});
+bp.registerBThread("test cell_2_2", function() {
+    //  bp.sync({waitFor:bp.Event("done_init")});
+    //  while(true) {
+    //     bp.sync({ request:Move(1,1,2,2,new Piece(Piece.Color.black ,Piece.Type.rook ,1)),
+    //          // Move(1,1,0,0,new Piece(Piece.Color.black ,Piece.Type.rook ,1))
+    //         }
+    //          );
+    //
+    //  }
+    bp.sync({waitFor: arrOfAMoveTo[2][2]});
+    bp.sync({block: arrOfAMoveTo[2][2]});
 
-bp.registerBThread("test cell_0_0", function() {
-    // bp.sync({waitFor:bp.Event("game_start")});
-    while(true) {
-        bp.sync({ request:Move(1,1,2,0,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
-    }
 });
 
 // bp.registerBThread("test block cell_0_0", function() {
