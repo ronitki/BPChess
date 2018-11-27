@@ -253,12 +253,12 @@ bp.registerBThread("game_duration", function () {
 //     }
 // });
 
-// bp.registerBThread("test cell_0_0", function() {
-//     // bp.sync({waitFor:bp.Event("game_start")});
-//     while(true) {
-//         bp.sync({ request:Move(1,1,2,0,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
-//     }
-// });
+bp.registerBThread("test cell_0_0", function() {
+    // bp.sync({waitFor:bp.Event("game_start")});
+    while(true) {
+        bp.sync({ request:Move(1,1,2,0,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
+    }
+});
 
 // bp.registerBThread("test block cell_0_0", function() {
 //     // bp.sync({waitFor:bp.Event("game_start")});
