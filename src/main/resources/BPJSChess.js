@@ -30,6 +30,22 @@ var isWhiteMove = bp.EventSet("White Move events", function (e) {
 
 });
 
+var isId_1_Move = bp.EventSet("Id_1 events", function (e) {
+
+    if (e instanceof AMove)
+        return  e.getPiece().getId() == 1;
+    return false;
+
+});
+
+var isId_2_Move = bp.EventSet("Id_2 events", function (e) {
+
+    if (e instanceof AMove)
+        return  e.getPiece().getId() == 2;
+    return false;
+
+});
+
 var isIllegal= bp.EventSet("Illegal Moves", function(e){
 
     if(e instanceof AMove)
@@ -74,10 +90,38 @@ bp.registerBThread("block illegal moves", function () {
 bp.registerBThread("move rook",function () {
     var move = bp.sync({waitFor: isRookMove});
     bp.sync({waitFor:bp.Event("game_start")});
-    while(true) {
-        move = bp.sync({request: Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 2,
-                move.getTargetY(), move.getPiece())});
-    }
+    while(true)
+        move = bp.sync({request: [
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 2, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 3, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 4, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 5, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 6, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 7, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 2, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 3, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 4, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 5, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 6, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 7, move.getTargetY(), move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+1, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+2, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+3, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+4, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+5, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+6, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()+7, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-1, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-2, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-3, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-4, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-5, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-6, move.getPiece()),
+            Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY()-7, move.getPiece()),
+        ]});
+
 });
 
 

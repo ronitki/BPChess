@@ -9,9 +9,7 @@ import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
 
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 
-/**
- * A base class for moves (X or O) in the tic-tac-toe game.
- */
+
 @SuppressWarnings("serial")
 public class Move extends AMove {
 

@@ -1,5 +1,7 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.events;
 
+import il.ac.bgu.cs.bp.bpjs.model.BEvent;
+
 /**
  * Created by Ronit on 02-Oct-18.
  */
