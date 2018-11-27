@@ -7,6 +7,28 @@
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.Pieces);
 
+var isMove =bp.EventSet("Move events", function (e) {
+    return (e instanceof AMove);
+});
+
+var isAMoveTo_0_0=bp.EventSet("AMoveTo events", function (e) {
+    if (e instanceof AMove) {
+        return (e.getTargetX() == 0 && e.getTargetY() == 0);
+    }
+    return false;
+});
+
+var isMoveTo_0_0=bp.EventSet("MoveTo events", function (e) {
+    if (e instanceof Move)
+        return (e.getTargetX()== 0 && e.getTargetY()==0);
+    return false;
+});
+
+var isAMoveFrom_0_0=bp.EventSet("AMoveFrom events", function (e) {
+    if (e instanceof AMove)
+        return (e.getSourceX()== 0 && e.getSourceY()==0);
+    return false;
+});
 
 var isRookMove = bp.EventSet("Rook Move events", function (e) {
 
@@ -64,7 +86,6 @@ var isIllegal= bp.EventSet("Illegal Moves", function(e){
 
 })
 
-
 bp.log.info('Chess - Let the game begin!');
 
 bp.registerBThread("game_duration", function () {
@@ -86,7 +107,6 @@ bp.registerBThread("init_Start_thread",function(){
     bp.sync({ request:bp.Event("init_end")});
 });
 
-
 bp.registerBThread("block illegal moves", function () {
     while (true) {
         bp.sync({block: isIllegal});
@@ -94,7 +114,7 @@ bp.registerBThread("block illegal moves", function () {
 })
 
 bp.registerBThread("move rook",function () {
-    var move = bp.sync({waitFor: isRookMove});
+    var move = bp.sync({waitFor: [isRookMove]});
     bp.sync({waitFor:bp.Event("game_start")});
     while(true)
         move = bp.sync({request: [
@@ -145,7 +165,7 @@ bp.registerBThread("move king",function () {
     }
 });
 
- bp.registerBThread("EnforceTurns", function() {
+bp.registerBThread("EnforceTurns", function() {
      bp.sync({waitFor:bp.Event("game_start")});
      while (true) {
          bp.sync({waitFor:isBlackMove,block:isWhiteMove});
@@ -153,4 +173,34 @@ bp.registerBThread("move king",function () {
      }
      });
 
-////
+bp.registerBThread("WaitFor10Moves", function() {
+    bp.sync({waitFor:bp.Event("game_start")});
+    for (var i = 0; i < 10; i++) {
+        bp.sync({waitFor: isMove});
+    }
+    bp.sync({block:isMove});
+});
+
+bp.registerBThread("block move to occupied cell_0_0", function() {
+    bp.sync({waitFor:bp.Event("game_start")});
+    while(true) {
+        bp.sync({waitFor: isAMoveTo_0_0});
+        bp.sync({block: isMoveTo_0_0,waitFor: isAMoveFrom_0_0});
+    }
+});
+
+bp.registerBThread("block move from empty cell_0_0", function() {
+     bp.sync({waitFor:bp.Event("game_start")});
+    while(true) {
+        bp.sync({waitFor: isAMoveTo_0_0, block: isAMoveFrom_0_0});
+        bp.sync({waitFor: isAMoveFrom_0_0});
+    }
+});
+
+
+// bp.registerBThread("test cell_0_0", function() {
+//     // bp.sync({waitFor:bp.Event("game_start")});
+//     while(true) {
+//         bp.sync({ request:Move(0,0,4,4,new Piece(Piece.Color.black ,Piece.Type.rook ,1))});
+//     }
+// });
