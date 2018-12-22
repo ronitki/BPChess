@@ -2,80 +2,9 @@
 //  * Created by Ronit on 02-Oct-18.
 //  */
 
-
-
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.Pieces);
 
-
-var arrOfAMoveTo=initArr();
-var arrOfAMoveFrom=initArr();
-var arrOfMoveTo=initArr();
-
-function createBpEventOfAmoveTo(i,j){
-    var bpevent=bp.EventSet("AMove To_"+i+"_"+j, function (e) {
-        bp.log.info(e);
-        if (e instanceof AMove) {
-            return (e.getTargetX() == i && e.getTargetY() == j);
-        }
-        return false;
-    });
-    return bpevent;
-}
-function createBpEventOfAmoveFrom(i,j){
-    var bpevent=bp.EventSet("AMove From_"+i+"_"+j, function (e) {
-        if (e instanceof AMove) {
-            return (e.getSourceX() == i && e.getSourceY() == j);
-        }
-        return false;
-    });
-    return bpevent;
-}
-function createBpEventOfMoveTo(i,j){
-    var bpevent=bp.EventSet("Move To_"+i+"_"+j, function (e) {
-        if (e instanceof Move) {
-            return (e.getTargetX() == i && e.getTargetY() == j);
-        }
-        return false;
-    });
-    return bpevent;
-}
-function initBoard(){
-    for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            arrOfAMoveTo[i][j]=createBpEventOfAmoveTo(i,j);
-            arrOfAMoveFrom[i][j]=createBpEventOfAmoveFrom(i,j);
-            arrOfMoveTo[i][j]=createBpEventOfMoveTo(i,j);
-
-            bp.registerBThread("block move to occupied cell_"+i+"_"+j, function() {
-                bp.sync({waitFor:bp.Event("game_start")});
-               while(true) {
-                   bp.sync({waitFor: arrOfAMoveTo[i][j]});
-                   bp.sync({block: arrOfMoveTo[i][j],waitFor: arrOfAMoveFrom[i][j]});
-               }
-             });
-            bp.registerBThread("block move from empty cell_"+i+"_"+j, function() {
-                     bp.sync({waitFor: bp.Event("game_start")});
-                    while (true) {
-                        bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfAMoveFrom[i][j]});
-                        bp.sync({waitFor: arrOfAMoveTo[i][j]});
-                    }
-                });
-        }
-    }
-    bp.registerBThread("finished board init", function () {
-    bp.sync({ request:bp.Event("done_init")});
-    });
-}
-function initArr(){
-    var arr=[];
-    for (var i = 0; i < 9; i++) {
-         arr[i] = [];
-    }
-    return arr;
-}
-
- //initBoard();
 var isMove =bp.EventSet("Move events", function (e) {
     return (e instanceof AMove);
 });
@@ -89,8 +18,8 @@ var isAmoveInPlace=bp.EventSet("AMove In Place events", function (e) {
 var isRookMove = bp.EventSet("Rook Move events", function (e) {
 
     if (e instanceof AMove)
-       return  e.getPiece().getType() == Piece.Type.rook;
-return false;
+        return  e.getPiece().getType() == Piece.Type.rook;
+    return false;
 
 });
 
@@ -141,6 +70,77 @@ var isIllegal= bp.EventSet("Illegal Moves", function(e){
     return false;
 
 })
+
+function initArr(){
+    var arr=[];
+    for (var i = 0; i < 9; i++) {
+        arr[i] = [];
+    }
+    return arr;
+}
+
+var arrOfAMoveTo=initArr();
+
+var arrOfAMoveFrom=initArr();
+
+var arrOfMoveTo=initArr();
+
+function CreateBpEventes() {
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            arrOfAMoveTo[i][j] = bp.EventSet("AMove To_" + i + "_" + j, function (e) {
+                bp.log.info(e);
+                if (e instanceof AMove) {
+                    return (e.getTargetX() == i && e.getTargetY() == j);
+                }
+                return false;
+            });
+            arrOfAMoveFrom[i][j] = bp.EventSet("AMove From_" + i + "_" + j, function (e) {
+                if (e instanceof AMove) {
+                    return (e.getSourceX() == i && e.getSourceY() == j);
+                }
+                return false;
+            });
+            arrOfMoveTo[i][j] = bp.EventSet("Move To_" + i + "_" + j, function (e) {
+                if (e instanceof Move) {
+                    return (e.getTargetX() == i && e.getTargetY() == j);
+                }
+                return false;
+            });
+        }
+    }
+}
+
+function CreateBpThreads(){
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            bp.registerBThread("block move to occupied cell_"+i+"_"+j, function() {
+                bp.sync({waitFor:bp.Event("game_start")});
+                while(true) {
+                    bp.sync({waitFor: arrOfAMoveTo[i][j]});
+                    bp.sync({block: arrOfMoveTo[i][j],waitFor: arrOfAMoveFrom[i][j]});
+                }
+            });
+            bp.registerBThread("block move from empty cell_"+i+"_"+j, function() {
+                bp.sync({waitFor: bp.Event("game_start")});
+                while (true) {
+                    bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfAMoveFrom[i][j]});
+                    bp.sync({waitFor: arrOfAMoveTo[i][j]});
+                }
+            });
+        }
+    }
+}
+
+function initBoard(){
+    CreateBpEventes();
+    CreateBpThreads();
+    bp.registerBThread("finished board init", function () {
+    bp.sync({ request:bp.Event("done_init")});
+    });
+}
+
+ initBoard();
 
 bp.log.info('Chess - Let the game begin!');
 
