@@ -7,17 +7,12 @@ import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
  */
 public class Eat extends AMove {
 
-
     public Eat(int sx, int sy, int tx, int ty, Piece p) {
-        sourceX=sx;
-        sourceY=sy;
-        targetX=tx;
-        targetY=ty;
-        piece=p;
+        super(sx,sy,tx,ty,p);
     }
 
     @Override
      public String toString() {
-        return "Ate " + this.piece.toString() + " From " +this.sourceX+","+this.sourceY+ " To "+ this.targetX+","+this.targetY;
+        return "Ate " + getPiece() + " From " +getSourceX()+","+getSourceY()+ " To "+ getTargetX()+","+getTargetY();
     }
 }

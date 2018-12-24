@@ -1,5 +1,7 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.Pieces;
 
+import java.util.Arrays;
+
 /**
  * Created by Ronit on 04-Nov-18.
  */
@@ -14,8 +16,7 @@ public class Piece {
     private Type type;
     private int id;
 
-
-    public Piece(Color color,Type type, int id) {
+    public Piece(Color color, Type type, int id) {
         this.color = color;
         this.type = type;
         this.id = id;
@@ -25,24 +26,12 @@ public class Piece {
         return color;
     }
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     public Type getType() {
         return type;
     }
 
-    public void setType(Type type) {
-        this.type = type;
-    }
-
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     @Override
@@ -52,6 +41,28 @@ public class Piece {
                 ", type=" + type +
                 ", id=" + id +
                 '}';
+    }
+
+    /*
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!getClass().isInstance(obj)) {
+            return false;
+        }
+        Piece other = (Piece) obj;
+        if (getColor() != other.getColor() || getType() != other.getType() || getId() != other.getId()) {
+            return false;
+        }
+
+        return true;
     }
 }
 
