@@ -9,20 +9,13 @@ var isGameEnded = bp.EventSet("GameEnded Events", function (e) {
     return (e instanceof GameEnded);
 });
 
-var isMove = bp.EventSet("Move events", function (e) {
+var isAMove = bp.EventSet("Move events", function (e) {
     return (e instanceof AMove);
 });
 
 var isAmoveInPlace = bp.EventSet("AMove In Place events", function (e) {
     if (e instanceof AMove) {
         return (e.getSourceX() === e.getTargetX() && e.getSourceY() === e.getTargetY());
-    }
-    return false;
-});
-
-var isRookMove = bp.EventSet("Rook Move events", function (e) {
-    if (e instanceof AMove) {
-        return e.getPiece().getType() === Piece.Type.rook;
     }
     return false;
 });
@@ -42,20 +35,6 @@ var isBlackMove = bp.EventSet("Black Move events", function (e) {
     return false;
 });
 
-var isId_1_Move = bp.EventSet("Id_1 events", function (e) {
-    if (e instanceof AMove) {
-        return e.getPiece().getId() === 1;
-    }
-    return false;
-});
-
-var isId_2_Move = bp.EventSet("Id_2 events", function (e) {
-    if (e instanceof AMove) {
-        return e.getPiece().getId() === 2;
-    }
-    return false;
-});
-
 var outOfBoardMove = bp.EventSet("Illegal out of board moves", function (e) {
     if (e instanceof AMove) {
         return (e.getTargetX() < 0 || e.getTargetX() > 7 || e.getTargetY() < 0 || e.getTargetY() > 7);
@@ -69,23 +48,20 @@ var arrOfMoveTo = new Array(8);
 
 
 function cellInitialization(i,j) {
-    //  EVENT SET
+    //  EVENT SETS FOR CELLS
     arrOfAMoveTo[i][j] = bp.EventSet("AMove To_" + i + "_" + j, function (e) {
-        // bp.log.info("Checkpoint AMoveTo "+i+"_"+j);
         if (e instanceof AMove) {
             return (e.getTargetX() === i && e.getTargetY() === j);
         }
         return false;
     });
     arrOfAMoveFrom[i][j] = bp.EventSet("AMove From_" + i + "_" + j, function (e) {
-        // bp.log.info("Checkpoint AMoveFrom "+i+"_"+j);
         if (e instanceof AMove) {
             return (e.getSourceX() === i && e.getSourceY() === j);
         }
         return false;
     });
     arrOfMoveTo[i][j] = bp.EventSet("Move To_" + i + "_" + j, function (e) {
-        // bp.log.info("Checkpoint MoveTo "+i+"_"+j);
         if (e instanceof Move) {
             return (e.getTargetX() === i && e.getTargetY() === j);
         }
@@ -93,11 +69,11 @@ function cellInitialization(i,j) {
     });
 
 
-    // BTHREADS
+    // BTHREADS FOR CELLS
     bp.registerBThread("block move to occupied cell_" + i + "_" + j, function () {
-        bp.sync({waitFor: arrOfAMoveTo[i][j]});
-        bp.sync({waitFor: bp.Event("game_start")});
+        // bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
+            bp.sync({waitFor: arrOfAMoveTo[i][j]});
             bp.sync({block: arrOfMoveTo[i][j], waitFor: arrOfAMoveFrom[i][j]});
         }
     });
@@ -181,8 +157,6 @@ function kingBTs(color) {
     bp.registerBThread("move king " + color, function () {
         var move = bp.sync({waitFor: isKingMove});
         bp.sync({waitFor: bp.Event("game_start")});
-        // var m = new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() - 1, move.getPiece());
-        // bp.log.info("arrived here: "+ m);
         while (true) {
             move = bp.sync({
                 request: [
@@ -240,8 +214,8 @@ bp.registerBThread("init_Start_thread", function () {
 bp.registerBThread("StopAfter10Moves", function () {
     bp.sync({waitFor: bp.Event("game_start")});
     for (var i = 0; i < 10; i++) {
-        bp.sync({waitFor: isMove});
+        bp.sync({waitFor: isAMove});
     }
     bp.log.info("Arrived 10 moves");
-    bp.sync({block: isMove});
+    bp.sync({block: isAMove});
 });
