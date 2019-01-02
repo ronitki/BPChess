@@ -236,7 +236,7 @@ function initPiecesBTs() {
         }
     }
 }
-initPiecesBTs();
+//initPiecesBTs();
 
 bp.registerBThread("block out of board moves", function () {
     bp.sync({ block: outOfBoardMove });
@@ -259,27 +259,32 @@ bp.registerBThread("init_Start_thread", function () {
     bp.sync({waitFor: bp.Event("init_start")});
     bp.sync({request: Init(4, 4, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
     bp.sync({request: Init(6, 5, new Piece(Piece.Color.white, Piece.Type.king, 1))});
-    bp.sync({request: Init(1, 4, new Piece(Piece.Color.black, Piece.Type.rook, 2))});
-    bp.sync({request: Init(2, 3, new Piece(Piece.Color.black, Piece.Type.king, 1))});
+    bp.sync({request: Init(2, 2, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
+    bp.sync({request: Init(5, 4, new Piece(Piece.Color.black, Piece.Type.rook, 2))});
+    bp.sync({request: Init(5, 5, new Piece(Piece.Color.black, Piece.Type.king, 1))});
     bp.sync({request: bp.Event("init_end")});
 });
 
 bp.registerBThread("StopAfter10Moves", function () {
     bp.sync({waitFor: bp.Event("game_start")});
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 50; i++) {
         bp.sync({waitFor: isAMove});
     }
     bp.log.info("Arrived 10 moves");
     bp.sync({block: isAMove});
 });
 //
-// bp.registerBThread("test", function () {
-//     bp.log.info("LaaaaaaaaaaaaaaaaaaaaaLLLLALALAAA");
-//     bp.sync({waitFor: bp.Event("game_start")});
-//     bp.sync({request: Eat(4, 4,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-//     bp.log.info("hello");
-//     bp.sync({request: Move(6, 5,4,4, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-//     bp.log.info("heloooo");
-//     bp.sync({request: Move(4, 4,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-//     bp.log.info("hiiiiiiiiii");
-// });
+bp.registerBThread("test", function () {
+    bp.log.info("LaaaaaaaaaaaaaaaaaaaaaLLLLALALAAA");
+    bp.sync({waitFor: bp.Event("game_start")});
+    bp.sync({request: Move(4, 4,6,6, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+    bp.sync({request: Move(6, 5,4,6, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
+    bp.log.info("hello");
+    bp.sync({request: Move(6, 6,4,2, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+    bp.sync({request: Move(4, 6,4,7, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
+    bp.log.info("heloooo");
+    bp.sync({request: Move(4, 2,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+    bp.sync({request: Move(4, 7,4,6, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
+
+    bp.log.info("hiiiiiiiiii");
+});
