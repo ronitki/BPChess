@@ -156,17 +156,7 @@ function rookBTs(color, id) {
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 4, move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 5, move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 6, move.getPiece()),
-                    new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 7, move.getPiece())
-                ]
-            });
-    });
-    bp.registerBThread("eat rook "+color+" "+id, function () {
-        var move = bp.sync({ waitFor: rookMoveES });
-        bp.sync({waitFor: bp.Event("game_start")});
-        bp.log.info("arrived here");
-        while (true)
-            move = bp.sync({
-                request: [
+                    new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 7, move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY(), move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 2, move.getTargetY(), move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 3, move.getTargetY(), move.getPiece()),
@@ -198,6 +188,7 @@ function rookBTs(color, id) {
                 ]
             });
     });
+
 }
 
 function kingBTs(color) {
@@ -220,17 +211,7 @@ function kingBTs(color) {
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY(), move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() + 1, move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 1, move.getPiece()),
-                    new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() + 1, move.getPiece())
-                ]
-            });
-        }
-    });
-    bp.registerBThread("eat king " + color, function () {
-        var move = bp.sync({waitFor: isKingMove});
-        bp.sync({waitFor: bp.Event("game_start")});
-        while (true) {
-            move = bp.sync({
-                request: [
+                    new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() + 1, move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() - 1, move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 1, move.getPiece()),
                     new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() - 1, move.getPiece()),
@@ -243,6 +224,7 @@ function kingBTs(color) {
             });
         }
     });
+
 }
 
 function initPiecesBTs() {
