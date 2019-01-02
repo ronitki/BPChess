@@ -45,6 +45,7 @@ var outOfBoardMove = bp.EventSet("Illegal out of board moves", function (e) {
 var arrOfAMoveTo = new Array(8);
 var arrOfAMoveFrom = new Array(8);
 var arrOfMoveTo = new Array(8);
+var arrOfEatTo = new Array(8);
 
 
 function cellInitialization(i,j) {
@@ -67,20 +68,33 @@ function cellInitialization(i,j) {
         }
         return false;
     });
-
+    arrOfEatTo[i][j] = bp.EventSet("Eat To_" + i + "_" + j, function (e) {
+        if (e instanceof Eat) {
+            return (e.getTargetX() === i && e.getTargetY() === j);
+        }
+        return false;
+    });
 
     // BTHREADS FOR CELLS
     bp.registerBThread("block move to occupied cell_" + i + "_" + j, function () {
-        // bp.sync({waitFor: bp.Event("game_start")});
+
+        //bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
             bp.sync({waitFor: arrOfAMoveTo[i][j]});
             bp.sync({block: arrOfMoveTo[i][j], waitFor: arrOfAMoveFrom[i][j]});
         }
     });
     bp.registerBThread("block move from empty cell_" + i + "_" + j, function () {
-        // bp.sync({waitFor: bp.Event("game_start")});
+       //  bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
             bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfAMoveFrom[i][j]});
+            bp.sync({waitFor: arrOfAMoveFrom[i][j]});
+        }
+    });
+    bp.registerBThread("block eat to empty cell_" + i + "_" + j, function () {
+        // bp.sync({waitFor: bp.Event("game_start")});
+        while (true) {
+            bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfEatTo[i][j]});
             bp.sync({waitFor: arrOfAMoveFrom[i][j]});
         }
     });
@@ -89,6 +103,7 @@ for (var i = 0; i < 8; i++) {
     arrOfAMoveTo [i] = new Array(8);
     arrOfAMoveFrom[i] = new Array(8);
     arrOfMoveTo[i] = new Array(8);
+    arrOfEatTo[i]=new Array(8);
     for (var j = 0; j < 8; j++) {
         cellInitialization(i, j);
     }
@@ -145,6 +160,44 @@ function rookBTs(color, id) {
                 ]
             });
     });
+    bp.registerBThread("eat rook "+color+" "+id, function () {
+        var move = bp.sync({ waitFor: rookMoveES });
+        bp.sync({waitFor: bp.Event("game_start")});
+        bp.log.info("arrived here");
+        while (true)
+            move = bp.sync({
+                request: [
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 2, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 3, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 4, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 5, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 6, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 7, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 2, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 3, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 4, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 5, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 6, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 7, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 2, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 3, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 4, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 5, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 6, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 7, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 2, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 3, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 4, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 5, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 6, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 7, move.getPiece())
+                ]
+            });
+    });
 }
 
 function kingBTs(color) {
@@ -168,6 +221,24 @@ function kingBTs(color) {
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() + 1, move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 1, move.getPiece()),
                     new Move(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() + 1, move.getPiece())
+                ]
+            });
+        }
+    });
+    bp.registerBThread("eat king " + color, function () {
+        var move = bp.sync({waitFor: isKingMove});
+        bp.sync({waitFor: bp.Event("game_start")});
+        while (true) {
+            move = bp.sync({
+                request: [
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() - 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() - 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() - 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY(), move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() - 1, move.getTargetY() + 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX(), move.getTargetY() + 1, move.getPiece()),
+                    new Eat(move.getTargetX(), move.getTargetY(), move.getTargetX() + 1, move.getTargetY() + 1, move.getPiece())
                 ]
             });
         }
@@ -219,3 +290,14 @@ bp.registerBThread("StopAfter10Moves", function () {
     bp.log.info("Arrived 10 moves");
     bp.sync({block: isAMove});
 });
+//
+// bp.registerBThread("test", function () {
+//     bp.log.info("LaaaaaaaaaaaaaaaaaaaaaLLLLALALAAA");
+//     bp.sync({waitFor: bp.Event("game_start")});
+//     bp.sync({request: Eat(4, 4,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+//     bp.log.info("hello");
+//     bp.sync({request: Move(6, 5,4,4, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+//     bp.log.info("heloooo");
+//     bp.sync({request: Move(4, 4,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
+//     bp.log.info("hiiiiiiiiii");
+// });
