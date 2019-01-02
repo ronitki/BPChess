@@ -46,6 +46,10 @@ var arrOfAMoveTo = new Array(8);
 var arrOfAMoveFrom = new Array(8);
 var arrOfMoveTo = new Array(8);
 var arrOfEatTo = new Array(8);
+var arrOfAMoveWhiteTo=new Array(8);
+var arrOfAMoveBlackTo=new Array(8);
+var arrOfEatWhiteTo=new Array(8);
+var arrOfEatBlackTo=new Array(8);
 
 
 function cellInitialization(i,j) {
@@ -74,28 +78,60 @@ function cellInitialization(i,j) {
         }
         return false;
     });
+    arrOfAMoveWhiteTo[i][j] = bp.EventSet("AMoveWhite To _" + i + "_" + j, function (e) {
+        if (e instanceof AMove) {
+            return (e.getTargetX() === i && e.getTargetY() === j && e.getPiece().getColor() === Piece.Color.white);
+        }
+        return false;
+    });
+    arrOfAMoveBlackTo[i][j] = bp.EventSet("AMoveBlack To _" + i + "_" + j, function (e) {
+        if (e instanceof AMove) {
+            return (e.getTargetX() === i && e.getTargetY() === j && e.getPiece().getColor() === Piece.Color.black);
+        }
+        return false;
+    });
+    arrOfEatWhiteTo[i][j] = bp.EventSet("EatWhite To _" + i + "_" + j, function (e) {
+        if (e instanceof Eat) {
+            return (e.getTargetX() === i && e.getTargetY() === j && e.getPiece().getColor() === Piece.Color.white);
+        }
+        return false;
+    });
+    arrOfEatBlackTo[i][j] = bp.EventSet("EatBlack To _" + i + "_" + j, function (e) {
+        if (e instanceof Eat) {
+            return (e.getTargetX() === i && e.getTargetY() === j && e.getPiece().getColor() === Piece.Color.black);
+        }
+        return false;
+    });
 
     // BTHREADS FOR CELLS
     bp.registerBThread("block move to occupied cell_" + i + "_" + j, function () {
-
-        //bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
             bp.sync({waitFor: arrOfAMoveTo[i][j]});
             bp.sync({block: arrOfMoveTo[i][j], waitFor: arrOfAMoveFrom[i][j]});
         }
     });
     bp.registerBThread("block move from empty cell_" + i + "_" + j, function () {
-       //  bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
             bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfAMoveFrom[i][j]});
             bp.sync({waitFor: arrOfAMoveFrom[i][j]});
         }
     });
     bp.registerBThread("block eat to empty cell_" + i + "_" + j, function () {
-        // bp.sync({waitFor: bp.Event("game_start")});
         while (true) {
             bp.sync({waitFor: arrOfAMoveTo[i][j], block: arrOfEatTo[i][j]});
             bp.sync({waitFor: arrOfAMoveFrom[i][j]});
+        }
+    });
+    bp.registerBThread("block eat black to black_" + i + "_" + j, function () {
+        while (true) {
+            bp.sync({waitFor: arrOfAMoveBlackTo[i][j]});
+            bp.sync({waitFor: [arrOfAMoveWhiteTo[i][j],arrOfAMoveFrom[i][j]], block: arrOfEatBlackTo[i][j]});
+        }
+    });
+    bp.registerBThread("block eat white to white" + i + "_" + j, function () {
+        while (true) {
+            bp.sync({waitFor: arrOfAMoveWhiteTo[i][j]});
+            bp.sync({waitFor: [arrOfAMoveBlackTo[i][j],arrOfAMoveFrom[i][j]], block: arrOfEatWhiteTo[i][j]});
         }
     });
 }
@@ -104,6 +140,10 @@ for (var i = 0; i < 8; i++) {
     arrOfAMoveFrom[i] = new Array(8);
     arrOfMoveTo[i] = new Array(8);
     arrOfEatTo[i]=new Array(8);
+    arrOfAMoveWhiteTo[i]=new Array(8);
+    arrOfAMoveBlackTo[i]=new Array(8);
+    arrOfEatWhiteTo[i]=new Array(8);
+    arrOfEatBlackTo[i]=new Array(8);
     for (var j = 0; j < 8; j++) {
         cellInitialization(i, j);
     }
@@ -125,7 +165,6 @@ function rookBTs(color, id) {
     bp.registerBThread("move rook "+color+" "+id, function () {
         var move = bp.sync({ waitFor: rookMoveES });
         bp.sync({waitFor: bp.Event("game_start")});
-        bp.log.info("arrived here");
         while (true)
             move = bp.sync({
                 request: [
@@ -236,7 +275,7 @@ function initPiecesBTs() {
         }
     }
 }
-//initPiecesBTs();
+initPiecesBTs();
 
 bp.registerBThread("block out of board moves", function () {
     bp.sync({ block: outOfBoardMove });
@@ -259,7 +298,6 @@ bp.registerBThread("init_Start_thread", function () {
     bp.sync({waitFor: bp.Event("init_start")});
     bp.sync({request: Init(4, 4, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
     bp.sync({request: Init(6, 5, new Piece(Piece.Color.white, Piece.Type.king, 1))});
-    bp.sync({request: Init(2, 2, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
     bp.sync({request: Init(5, 4, new Piece(Piece.Color.black, Piece.Type.rook, 2))});
     bp.sync({request: Init(5, 5, new Piece(Piece.Color.black, Piece.Type.king, 1))});
     bp.sync({request: bp.Event("init_end")});
@@ -267,24 +305,11 @@ bp.registerBThread("init_Start_thread", function () {
 
 bp.registerBThread("StopAfter10Moves", function () {
     bp.sync({waitFor: bp.Event("game_start")});
-    for (var i = 0; i < 50; i++) {
+    for (var i = 0; i < 10; i++) {
         bp.sync({waitFor: isAMove});
     }
     bp.log.info("Arrived 10 moves");
     bp.sync({block: isAMove});
 });
-//
-bp.registerBThread("test", function () {
-    bp.log.info("LaaaaaaaaaaaaaaaaaaaaaLLLLALALAAA");
-    bp.sync({waitFor: bp.Event("game_start")});
-    bp.sync({request: Move(4, 4,6,6, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-    bp.sync({request: Move(6, 5,4,6, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
-    bp.log.info("hello");
-    bp.sync({request: Move(6, 6,4,2, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-    bp.sync({request: Move(4, 6,4,7, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
-    bp.log.info("heloooo");
-    bp.sync({request: Move(4, 2,6,5, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-    bp.sync({request: Move(4, 7,4,6, new Piece(Piece.Color.white, Piece.Type.rook, 1))});
 
-    bp.log.info("hiiiiiiiiii");
-});
+
