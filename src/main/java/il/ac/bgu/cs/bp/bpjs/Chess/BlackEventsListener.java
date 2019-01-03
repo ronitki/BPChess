@@ -15,9 +15,7 @@ import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 
 public class BlackEventsListener extends BProgramRunnerListenerAdapter {
-            @Override
     Map<String,String> dicionary = new HashMap<>();
-
     public BlackEventsListener() {
         dicionary.put("1","a");
         dicionary.put("2","b");
@@ -27,7 +25,7 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
         dicionary.put("6","f");
         dicionary.put("7","g");
     }
-
+    @Override
     public void eventSelected(BProgram bp, BEvent theEvent) {
 
 
