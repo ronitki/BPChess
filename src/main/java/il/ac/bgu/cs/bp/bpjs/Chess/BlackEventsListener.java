@@ -31,8 +31,6 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
 
                 if (theEvent instanceof Move) {
                     Move mv = (Move) theEvent;
-
-                    //   buttons[mv.row][mv.col].setText(mv.displayString());
                     System.out.println(dicionary.get(mv.getSourceX()+"")+mv.getSourceY()+dicionary.get(mv.getTargetX()+"")+mv.getSourceY());
                 }
 //                } else {
