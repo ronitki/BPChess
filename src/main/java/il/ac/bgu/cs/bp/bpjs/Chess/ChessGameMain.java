@@ -9,10 +9,11 @@ import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 import il.ac.bgu.cs.bp.bpjs.model.SingleResourceBProgram;
 import il.ac.bgu.cs.bp.bpjs.model.eventselection.PrioritizedBSyncEventSelectionStrategy;
 
+import java.io.UnsupportedEncodingException;
+
 public class ChessGameMain {
 
-    public static ChessDisplayerGame ChessDisplayer;
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, UnsupportedEncodingException {
 
         // Create a program
         BProgram bprog = new SingleResourceBProgram("BPJSChess.js");
@@ -20,8 +21,10 @@ public class ChessGameMain {
         bprog.setEventSelectionStrategy(new PrioritizedBSyncEventSelectionStrategy());
         bprog.setWaitForExternalEvents(true);
         BProgramRunner rnr = new BProgramRunner(bprog);
-        rnr.addListener(new PrintBProgramRunnerListener());
-        ChessDisplayer = new ChessDisplayerGame(bprog, rnr);
+//        rnr.addListener(new PrintBProgramRunnerListener());
+        rnr.addListener(new BlackEventsListener());
+        Thread l = new Thread(new GUIListener(bprog));
+        l.run();
         rnr.run();
         System.out.println("end of run");
     }

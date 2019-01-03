@@ -12,16 +12,7 @@ import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 
-public class ChessDisplayerGame implements  ActionListener{
-    private final BProgram bp;
-    private final BProgramRunner rnr;
-
-    public ChessDisplayerGame(BProgram bp, BProgramRunner rnr){
-        this.bp=bp;
-        this.rnr=rnr;
-
-        rnr.addListener(new BProgramRunnerListenerAdapter() {
-
+public class BlackEventsListener extends BProgramRunnerListenerAdapter {
             @Override
             public void eventSelected(BProgram bp, BEvent theEvent) {
                 if (theEvent instanceof Move) {
@@ -40,14 +31,4 @@ public class ChessDisplayerGame implements  ActionListener{
 //                    }
 //                }
             }
-
-        });
-
-
-
-    }
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
 }

@@ -25,7 +25,6 @@ var isWhiteMove = bp.EventSet("White Move events", function (e) {
         return e.getPiece().getColor() === Piece.Color.white;
     }
     return false;
-
 });
 
 var isBlackMove = bp.EventSet("Black Move events", function (e) {
@@ -311,5 +310,6 @@ bp.registerBThread("StopAfter10Moves", function () {
     bp.log.info("Arrived 10 moves");
     bp.sync({block: isAMove});
 });
+
 
 
