@@ -5,6 +5,7 @@
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.Pieces);
 
+
 var isGameEnded = bp.EventSet("GameEnded Events", function (e) {
     return (e instanceof GameEnded);
 });
@@ -266,7 +267,8 @@ function kingBTs(color) {
 }
 
 function initPiecesBTs() {
-    var colors = [Piece.Color.black, Piece.Color.white];
+    var colors = [Piece.Color.black];
+   // var colors = [Piece.Color.black, Piece.Color.white];
     for (var i=0; i<colors.length; i++) {
         kingBTs(colors[i]);
         for (var j=1; j<=2; j++) {
@@ -283,8 +285,9 @@ bp.registerBThread("block out of board moves", function () {
 bp.registerBThread("EnforceTurns", function () {
     bp.sync({waitFor: bp.Event("game_start")});
     while (true) {
-        bp.sync({waitFor: isBlackMove, block: isWhiteMove});
         bp.sync({waitFor: isWhiteMove, block: isBlackMove});
+        bp.sync({waitFor: isBlackMove, block: isWhiteMove});
+
     }
 });
 

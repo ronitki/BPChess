@@ -2,7 +2,6 @@ package il.ac.bgu.cs.bp.bpjs.Chess;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
-import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 
@@ -26,13 +25,14 @@ public class GUIListener implements Runnable {
         dicionaryInit();
     }
     private void dicionaryInit(){
-        dicionary.put("a",1);
-        dicionary.put("b",2);
-        dicionary.put("c",3);
-        dicionary.put("d",4);
-        dicionary.put("e",5);
-        dicionary.put("f",6);
-        dicionary.put("g",7);
+        dicionary.put("a",0);
+        dicionary.put("b",1);
+        dicionary.put("c",2);
+        dicionary.put("d",3);
+        dicionary.put("e",4);
+        dicionary.put("f",5);
+        dicionary.put("g",6);
+        dicionary.put("h",7);
     }
 
     @Override
