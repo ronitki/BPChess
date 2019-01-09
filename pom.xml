@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.github.bthink-bgu</groupId>
             <artifactId>BPjs</artifactId>
-            <version>[0.9.3,10.0.0]</version>
+            <version>0.9.6</version>
         </dependency>
     </dependencies>
 
