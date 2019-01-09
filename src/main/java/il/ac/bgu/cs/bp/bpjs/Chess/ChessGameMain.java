@@ -30,7 +30,7 @@ public class ChessGameMain {
 
         BProgramRunner rnr = new BProgramRunner(bprog);
 
-        this.uci = new UCI(System.in, System.out, bprog, chessLog);
+        this.uci = new UCI(System.in, System.out, bprog, rnr, chessLog);
         rnr.addListener(new PrintBProgramRunnerListener(new PrintStream("bp.log")));
         rnr.addListener(uci);
         rnr.addListener(bel);

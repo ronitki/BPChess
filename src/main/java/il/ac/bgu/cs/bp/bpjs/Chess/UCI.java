@@ -1,6 +1,7 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
+import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
@@ -16,16 +17,18 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
     private Scanner scanner;
     private PrintWriter logger;
     private BProgram bprog;
+    private BProgramRunner rnr;
 
     private String inititialBoard = "8/8/5kK1/4rr2/8/8/8/8 w KQkq - 0 1";
 
     private static final String ENGINENAME = "BPChess";
     private static final String AUTHOR = "Ronit and Banuel";
 
-    public UCI(InputStream in, PrintStream out, BProgram bprog, PrintWriter chessLog) {
+    public UCI(InputStream in, PrintStream out, BProgram bprog, BProgramRunner rnr, PrintWriter chessLog) {
         this.in = in;
         this.out = out;
         this.bprog = bprog;
+        this.rnr = rnr;
         this.scanner= new Scanner(in);
         this.logger = chessLog;
     }
@@ -118,13 +121,20 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
         return input;
     }
 
-    private static void print() {
-
-        System.out.println("Currently playing as black");
-
+    private void initFromFen(String fen) {
+        String lines[] = fen.split("\\");
+        for (int i = 0; i < lines.length; i++) {
+            bprog.enqueueExternalEvent(MoveTranslator.StringToMove(newPosition(lines[i])));
+        }
     }
-    private static void quit() {
-        System.out.println("Good game");
+
+    private void print() {
+        out.println("Currently playing as black");
+    }
+
+    private void quit() {
+        rnr.halt();
+        out.println("Good game");
     }
 
     private static void makeMove(String line) {

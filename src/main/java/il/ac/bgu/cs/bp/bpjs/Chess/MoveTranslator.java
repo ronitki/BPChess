@@ -1,6 +1,7 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.events.Init;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 
 public class MoveTranslator {
@@ -17,5 +18,9 @@ public class MoveTranslator {
 
     public static Move StringToMove(String move) {
         return new Move(ChartoNumber(move.charAt(0)),Character.getNumericValue(move.charAt(1)),ChartoNumber(move.charAt(2)),Character.getNumericValue(move.charAt(3)),new Piece(Piece.Color.black, Piece.Type.king, 1));
+    }
+
+    public static Init PlacePiece(String move) {
+        return null;//new Init();
     }
 }
