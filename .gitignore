@@ -16,3 +16,5 @@ log/
 target/
 arenalinux_64bit_1.1.tar.gz
 arena/
+changelog*
+*.log

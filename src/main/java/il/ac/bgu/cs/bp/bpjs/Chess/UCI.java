@@ -1,14 +1,11 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
-import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class UCI extends BProgramRunnerListenerAdapter implements Runnable{

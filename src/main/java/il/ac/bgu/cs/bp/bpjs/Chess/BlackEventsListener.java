@@ -14,6 +14,10 @@ import java.util.Map;
 public class BlackEventsListener extends BProgramRunnerListenerAdapter {
     private UCI uci;
 
+    public BlackEventsListener(UCI uci) {
+        this.uci = uci;
+    }
+
     @Override
     public void eventSelected(BProgram bp, BEvent theEvent) {
         if (theEvent.name.equals("init_end")){
