@@ -1,14 +1,21 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
+import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.events.Init;
+import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
-public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
+import static il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator.StringToMove;
+
+public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private InputStream in;
     private PrintStream out;
     private Scanner scanner;
@@ -27,7 +34,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
         this.out = out;
         this.bprog = bprog;
         this.rnr = rnr;
-        this.scanner= new Scanner(in);
+        this.scanner = new Scanner(in);
         this.logger = chessLog;
     }
 
@@ -47,29 +54,26 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
         logger.println("Ended startInputUCI");
     }
 
-    public void initCommunication(){
-        String line="";
-        while(!(line = scanner.nextLine()).equals("uci")) {
+    public void initCommunication() {
+        String line = "";
+        while (!(line = scanner.nextLine()).equals("uci")) {
             logger.println(line);
         }
+        initEnded();
     }
 
-    public void run(){
-        String line="";
-        while(true) {
+    public void run() {
+        String line = "";
+        while (true) {
             line = scanner.nextLine();
             logger.println(line);
             if (line.startsWith("setoption")) setOptions(line);
             else if ("isready".equals(line)) isReady();
             else if ("ucinewgame".equals(line)) newGame();
-            else if (line.startsWith("position")) {
-                bprog.enqueueExternalEvent(MoveTranslator.StringToMove(newPosition(line)));
-                newPosition(line);
-            }
+            else if (line.startsWith("position")) newPosition(line);
             else if (line.startsWith("go")) {
                 bprog.enqueueExternalEvent(new BEvent("My Turn"));
-            }
-            else if ("print".equals(line)) print();
+            } else if ("print".equals(line)) print();
             else if ("quit".equals(line)) {
                 quit();
                 return;
@@ -86,45 +90,85 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
     }
 
     private static void isReady() {
-        //ChessBoardFactory.initiateChessBoard();
         System.out.println("readyok");
     }
 
     private static void newGame() {
-        //ChessBoardFactory.initiateChessBoard();
+
 
     }
 
     private String newPosition(String input) {
-        input=input.substring(9).concat(" ");
+        input = input.substring(9).concat(" ");
+        // Normal Start
         if (input.contains("startpos ")) {
-            input=input.substring(9);
+            input = input.substring(9);
         }
+        // Different start
         else if (input.contains("fen")) {
-            input=input.substring(4);
+            input = input.substring(4);
+            String fenBoard = input.substring(0, input.indexOf(" w"));
+            splitFen(fenBoard);
+            bprog.enqueueExternalEvent(new BEvent("init_end"));
         }
-//        if (input.contains("b ")) {
-//            MoveIterator.PLAYER = MoveIterator.PLAYER_BLACK;
-//        }
-//        else if (input.contains("w ")) {
-//            MoveIterator.PLAYER = MoveIterator.PLAYER_WHITE;
-//        }
+
         if (input.contains("moves")) {
-            input = input.substring(input.indexOf("moves") + 6);
+            input = input.substring(input.length() - 5, input.length() - 1);
             if (input.length() > 0) {
-                makeMove(input);
-               // input=input.substring(input.indexOf(' ')+1);
+                bprog.enqueueExternalEvent(StringToMove(input));
             }
         }
         return input;
     }
 
-//    private void initFromFen(String fen) {
-//        String lines[] = fen.split("\\");
-//        for (int i = 0; i < lines.length; i++) {
-//            bprog.enqueueExternalEvent(MoveTranslator.StringToMove(newPosition(lines[i])));
-//        }
-//    }
+    private void splitFen(String fen) {
+        String[] lines = fen.split("/");
+        int bRooks = 1;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            for (int j = 0; j < line.length(); j++) {
+                int x = 0;
+                int y = 7;
+                String piece = "";
+                if (line.charAt(j) == 'r') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    Piece p = new Piece(Piece.Color.black, Piece.Type.rook, bRooks);
+                    bRooks++;
+                    System.out.println(x + "" + y + "" + p);
+                    enqueueInit(x, y, p);
+                } else if (line.charAt(j) == 'k') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    Piece p = new Piece(Piece.Color.black, Piece.Type.king, 1);
+                    System.out.println(x + "" + y + "" + p);
+                    enqueueInit(x, y, p);
+                } else if (line.charAt(j) == 'K') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    Piece p = new Piece(Piece.Color.white, Piece.Type.king, 1);
+                    System.out.println(x + "" + y + "" + p);
+                    enqueueInit(x, y, p);
+                }
+            }
+
+        }
+    }
+
+    private int getRow(String line, int index) {
+        int sum = 0;
+        for (int i = 0; i < index; i++) {
+            if (Character.isDigit(line.charAt(i)))
+                sum = sum + Character.getNumericValue(line.charAt(i));
+            else
+                sum++;
+        }
+        return sum;
+    }
+
+    private void enqueueInit(int x, int y, Piece piece) {
+        bprog.enqueueExternalEvent(new Init(x, y, piece));
+    }
 
     private void print() {
         out.println("Currently playing as black");
@@ -135,8 +179,4 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
         out.println("Good game");
     }
 
-    private static void makeMove(String line) {
-//        BEvent translatedEvented = new Move(dicionary.get(line.charAt(0)),Character.getNumericValue(line.charAt(1)),dicionary.get(line.charAt(2)),Character.getNumericValue(line.charAt(3)),new Piece(Piece.Color.black, Piece.Type.rook, 1));
-//        bprog.enqueueExternalEvent(translatedEvented);
-    }
 }

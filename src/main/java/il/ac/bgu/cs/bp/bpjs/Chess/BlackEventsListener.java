@@ -3,6 +3,8 @@ package il.ac.bgu.cs.bp.bpjs.Chess;
 /**
  * Created by Ronit on 24-Oct-18.
  */
+
+import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
@@ -20,12 +22,12 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
 
     @Override
     public void eventSelected(BProgram bp, BEvent theEvent) {
-        if (theEvent.name.equals("init_end")){
-            uci.initEnded();
-        }
-        else if (theEvent instanceof Move) {
+        if (theEvent instanceof Move) {
             Move mv = (Move) theEvent;
-            uci.sendMove(MoveTranslator.MoveToString(mv));
+            if (mv.getPiece().getColor() == Piece.Color.black) {
+                System.out.println("From Black " + mv);
+                uci.sendMove(MoveTranslator.MoveToString(mv));
+            }
         }
     }
 }
