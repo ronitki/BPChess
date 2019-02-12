@@ -49,7 +49,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
 
     public void initCommunication(){
         String line="";
-        while(!(line = scanner.nextLine()).equals("uci1")) {
+        while(!(line = scanner.nextLine()).equals("uci")) {
             logger.println(line);
         }
     }
