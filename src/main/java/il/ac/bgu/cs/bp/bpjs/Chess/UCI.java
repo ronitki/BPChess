@@ -118,12 +118,12 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
         return input;
     }
 
-    private void initFromFen(String fen) {
-        String lines[] = fen.split("\\");
-        for (int i = 0; i < lines.length; i++) {
-            bprog.enqueueExternalEvent(MoveTranslator.StringToMove(newPosition(lines[i])));
-        }
-    }
+//    private void initFromFen(String fen) {
+//        String lines[] = fen.split("\\");
+//        for (int i = 0; i < lines.length; i++) {
+//            bprog.enqueueExternalEvent(MoveTranslator.StringToMove(newPosition(lines[i])));
+//        }
+//    }
 
     private void print() {
         out.println("Currently playing as black");
