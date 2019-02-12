@@ -21,6 +21,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
     private static final String ENGINENAME = "BPChess";
     private static final String AUTHOR = "Ronit and Banuel";
 
+
     public UCI(InputStream in, PrintStream out, BProgram bprog, BProgramRunner rnr, PrintWriter chessLog) {
         this.in = in;
         this.out = out;
@@ -48,7 +49,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable{
 
     public void initCommunication(){
         String line="";
-        while(!(line = scanner.nextLine()).equals("uci")) {
+        while(!(line = scanner.nextLine()).equals("uci1")) {
             logger.println(line);
         }
     }
