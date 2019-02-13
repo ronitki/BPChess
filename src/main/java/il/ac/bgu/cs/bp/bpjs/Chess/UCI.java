@@ -22,7 +22,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private PrintWriter logger;
     private BProgram bprog;
     private BProgramRunner rnr;
-    private boolean wasInitialized = false;
+    private boolean wasInitialized=false;
 
     private String inititialBoard = "8/8/5kK1/4rr2/8/8/8/8 w KQkq - 0 1";
 
@@ -75,16 +75,11 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             else if (line.startsWith("go")) {
                 bprog.enqueueExternalEvent(new BEvent("My Turn"));
             } else if ("print".equals(line)) print();
-            else if (line.startsWith("bestmove")) test();
             else if ("quit".equals(line)) {
                 quit();
                 return;
             }
         }
-    }
-
-    private void test() {
-        out.println("sdds");
     }
 
     public void sendMove(String move) {
@@ -103,7 +98,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
 //        rnr.halt();
 //        rnr.run();
         //restart the main
-        wasInitialized = false;
+        wasInitialized=false;
 
     }
 
@@ -114,8 +109,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             input = input.substring(9);
         }
         // Different start
-        else if (input.contains("fen") && !wasInitialized) {
-            wasInitialized = true;
+        else if (input.contains("fen")&&!wasInitialized) {
+            wasInitialized=true;
             input = input.substring(4);
             String fenBoard = input.substring(0, input.indexOf(" w"));
             splitFen(fenBoard);
