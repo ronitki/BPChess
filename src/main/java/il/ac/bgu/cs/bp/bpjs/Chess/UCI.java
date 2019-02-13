@@ -22,6 +22,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private PrintWriter logger;
     private BProgram bprog;
     private BProgramRunner rnr;
+    private boolean wasInitialized=false;
 
     private String inititialBoard = "8/8/5kK1/4rr2/8/8/8/8 w KQkq - 0 1";
 
@@ -93,19 +94,23 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         System.out.println("readyok");
     }
 
-    private static void newGame() {
-
+    private void newGame() {
+//        rnr.halt();
+//        rnr.run();
+        //restart the main
+        wasInitialized=false;
 
     }
 
-    private String newPosition(String input) {
+    private void newPosition(String input) {
         input = input.substring(9).concat(" ");
         // Normal Start
         if (input.contains("startpos ")) {
             input = input.substring(9);
         }
         // Different start
-        else if (input.contains("fen")) {
+        else if (input.contains("fen")&&!wasInitialized) {
+            wasInitialized=true;
             input = input.substring(4);
             String fenBoard = input.substring(0, input.indexOf(" w"));
             splitFen(fenBoard);
@@ -118,7 +123,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 bprog.enqueueExternalEvent(StringToMove(input));
             }
         }
-        return input;
+
     }
 
     private void splitFen(String fen) {
@@ -135,19 +140,16 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                     y = y - i;
                     Piece p = new Piece(Piece.Color.black, Piece.Type.rook, bRooks);
                     bRooks++;
-                    System.out.println(x + "" + y + "" + p);
                     enqueueInit(x, y, p);
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
                     Piece p = new Piece(Piece.Color.black, Piece.Type.king, 1);
-                    System.out.println(x + "" + y + "" + p);
                     enqueueInit(x, y, p);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
                     Piece p = new Piece(Piece.Color.white, Piece.Type.king, 1);
-                    System.out.println(x + "" + y + "" + p);
                     enqueueInit(x, y, p);
                 }
             }

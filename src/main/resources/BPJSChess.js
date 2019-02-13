@@ -298,6 +298,15 @@ bp.registerBThread("EnforceTurns", function () {
     }
 });
 
+bp.registerBThread("Wait For My Turn", function () {
+    bp.sync({waitFor: bp.Event("game_start")});
+    while (true) {
+        bp.sync({waitFor: bp.Event("My Turn"), block: isBlackMove});
+        bp.sync({waitFor: isBlackMove});
+
+    }
+});
+
 bp.registerBThread("block moving to the same place", function () {
     bp.sync({waitFor: bp.Event("game_start")});
     bp.sync({block: isAmoveInPlace});
@@ -312,14 +321,7 @@ bp.registerBThread("block moving to the same place", function () {
 //     bp.sync({request: bp.Event("init_end")});
 // });
 
-bp.registerBThread("StopAfter10Moves", function () {
-    bp.sync({waitFor: bp.Event("game_start")});
-    for (var i = 0; i < 10; i++) {
-        bp.sync({waitFor: isAMove});
-    }
-    bp.log.info("Arrived 10 moves");
-    bp.sync({block: isAMove});
-});
+
 
 
 
