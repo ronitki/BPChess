@@ -3,7 +3,7 @@
 //  */
 
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
-importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.Pieces);
+importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema);
 
 
 var isGameEnded = bp.EventSet("GameEnded Events", function (e) {

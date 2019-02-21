@@ -1,13 +1,16 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
-import il.ac.bgu.cs.bp.bpjs.Chess.Pieces.Piece;
-import il.ac.bgu.cs.bp.bpjs.Chess.events.Init;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Piece;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
+import il.ac.bgu.cs.bp.bpjs.context.ContextService;
 import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
+import il.ac.bgu.cs.bp.bpjs.execution.listeners.PrintBProgramRunnerListener;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -20,9 +23,9 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private PrintStream out;
     private Scanner scanner;
     private PrintWriter logger;
-    private BProgram bprog;
-    private BProgramRunner rnr;
     private boolean wasInitialized=false;
+    private ContextService contextService;
+    private BProgram bprog;
 
     private String inititialBoard = "8/8/5kK1/4rr2/8/8/8/8 w KQkq - 0 1";
 
@@ -30,13 +33,13 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private static final String AUTHOR = "Ronit and Banuel";
 
 
-    public UCI(InputStream in, PrintStream out, BProgram bprog, BProgramRunner rnr, PrintWriter chessLog) {
+    public UCI(InputStream in, PrintStream out, ContextService contextService, PrintWriter chessLog) {
         this.in = in;
         this.out = out;
-        this.bprog = bprog;
-        this.rnr = rnr;
         this.scanner = new Scanner(in);
         this.logger = chessLog;
+        this.contextService = contextService;
+        this.bprog = contextService.getBProgram();
     }
 
     @Override
@@ -94,9 +97,21 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         System.out.println("readyok");
     }
 
-    private void newGame() {
-//        rnr.halt();
-//        rnr.run();
+    public void newGame() {
+        contextService.initFromResources("ContextDB", "ContextualChess-Population.js", "ContextualChess.js");
+        bprog = contextService.getBProgram();
+        bprog.setWaitForExternalEvents(true);
+
+
+        try {
+            contextService.addListener(new PrintBProgramRunnerListener(new PrintStream("bp.log")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        contextService.addListener(this);
+        contextService.addListener(new BlackEventsListener(this));
+        contextService.run();
+
         //restart the main
         wasInitialized=false;
 
@@ -169,7 +184,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     }
 
     private void enqueueInit(int x, int y, Piece piece) {
-        bprog.enqueueExternalEvent(new Init(x, y, piece));
+        bprog.enqueueExternalEvent(new Move(new Cell(-1,-1), new Cell(x,y), piece));
     }
 
     private void print() {
@@ -177,7 +192,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     }
 
     private void quit() {
-        rnr.halt();
+        contextService.close();
         out.println("Good game");
     }
 
