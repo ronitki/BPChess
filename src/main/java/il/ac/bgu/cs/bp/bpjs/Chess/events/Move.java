@@ -44,6 +44,19 @@ public class Move extends BEvent {
         }
     }
 
+    public static class SamePlaceMoveEventSet implements EventSet {
+        @Override
+        public boolean contains(BEvent bEvent) {
+            return bEvent instanceof Move && ((Move)bEvent).source.i==((Move)bEvent).target.i && ((Move)bEvent).source.j==((Move)bEvent).target.j;
+        }
+    }
+    public static class OutOfBoardMoveEventSet implements EventSet {
+        @Override
+        public boolean contains(BEvent bEvent) {
+            return bEvent instanceof Move && (((Move)bEvent).target.i<0 || ((Move)bEvent).target.i>7 || ((Move)bEvent).target.j<0 || ((Move)bEvent).target.j>7);
+        }
+    }
+
     public static class PieceMoveEventSet implements EventSet {
         private final Piece p;
 
@@ -67,6 +80,14 @@ public class Move extends BEvent {
         @Override
         public boolean contains(BEvent bEvent) {
             return bEvent instanceof Move && ((Move)bEvent).piece.color.equals(c);
+        }
+    }
+
+    public static class EatMoveEventSet implements EventSet {
+
+        @Override
+        public boolean contains(BEvent bEvent) {
+            return bEvent instanceof Move && ((Move)bEvent).target.piece!=null;
         }
     }
 }

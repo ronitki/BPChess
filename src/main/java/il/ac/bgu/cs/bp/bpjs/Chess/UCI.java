@@ -16,6 +16,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+
+
 import static il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator.StringToMove;
 
 public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
@@ -26,8 +28,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private boolean wasInitialized=false;
     private ContextService contextService;
     private BProgram bprog;
-
-    private String inititialBoard = "8/8/5kK1/4rr2/8/8/8/8 w KQkq - 0 1";
 
     private static final String ENGINENAME = "BPChess";
     private static final String AUTHOR = "Ronit and Banuel";
@@ -75,9 +75,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             else if ("isready".equals(line)) isReady();
             else if ("ucinewgame".equals(line)) newGame();
             else if (line.startsWith("position")) newPosition(line);
-            else if (line.startsWith("go")) {
+            else if (line.startsWith("go"))
                 bprog.enqueueExternalEvent(new BEvent("My Turn"));
-            } else if ("print".equals(line)) print();
             else if ("quit".equals(line)) {
                 quit();
                 return;
@@ -185,10 +184,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
 
     private void enqueueInit(int x, int y, Piece piece) {
         bprog.enqueueExternalEvent(new Move(new Cell(-1,-1), new Cell(x,y), piece));
-    }
-
-    private void print() {
-        out.println("Currently playing as black");
     }
 
     private void quit() {
