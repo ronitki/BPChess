@@ -6,6 +6,7 @@ import javax.persistence.*;
 @NamedQueries(value = {
         @NamedQuery(name = "Cell", query = "SELECT c FROM Cell c"),
         @NamedQuery(name = "NonEmptyCell", query = "SELECT c FROM Cell c WHERE not(c.piece is null)"),
+        @NamedQuery(name = "EmptyCell", query = "SELECT c FROM Cell c WHERE c.piece is null"),
         @NamedQuery(name = "SpecificCell", query = "SELECT c FROM Cell c WHERE c.i=:i AND c.j=:j"),
         @NamedQuery(name = "CellWithPiece", query = "SELECT c FROM Cell c WHERE c.piece=:p"),
         @NamedQuery(name = "UpdateCell", query = "Update Cell C set C.piece=:piece where C=:cell"),

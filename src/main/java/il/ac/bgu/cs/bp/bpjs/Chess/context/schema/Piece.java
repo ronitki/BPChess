@@ -8,8 +8,8 @@ import javax.persistence.*;
 @Entity
 @NamedQueries(value = {
         @NamedQuery(name = "Piece", query = "SELECT p FROM Piece p"),
-//        @NamedQuery(name = "Rook", query = "SELECT p FROM Piece p WHERE p.type=Piece.Type.rook"),
-//        @NamedQuery(name = "King", query = "SELECT p FROM Piece p WHERE p.type=Piece.Type.king"),
+        @NamedQuery(name = "IsAlive", query = "SELECT p FROM Piece p WHERE p.wasEaten=:false"),
+        @NamedQuery(name = "UpdatePiece", query = "Update Piece P set P.wasEaten=:wasEaten where P=:piece"),
 })
 public class Piece extends BasicEntity {
     public Piece() {
@@ -31,12 +31,15 @@ public class Piece extends BasicEntity {
     public final  Type type;
     @Column
     public final int id;
+    @Column
+    private  boolean wasEaten;
 
     public Piece(Color color, Type type, int id) {
         super(color +"_" + type + "_" +id );
         this.color = color;
         this.type = type;
         this.id = id;
+        this.wasEaten=false;
     }
 }
 
