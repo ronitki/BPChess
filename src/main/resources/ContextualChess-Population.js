@@ -15,7 +15,7 @@ function registerAllCellsQueries(cells, pieces) {
 }
 
 bp.registerBThread("PopulateDB", function() {
-    var cells = [], i = 0;
+    var cells = [], i = 0, row, cell;
     for (i = 0; i < size; i++) {
         row = [];
         for (j = 0; j < size; j++) {
@@ -25,7 +25,7 @@ bp.registerBThread("PopulateDB", function() {
     }
 
     var pieces = [];
-    var colors = [Piece.Color.white, Piece.Color.black]
+    var colors = [Piece.Color.white, Piece.Color.black];
     for (color = 0; color < 2; color++) {
         for (i = 0; i < size; i++) {
             pieces.push(new Piece(colors[color], Piece.Type.pawn, i));

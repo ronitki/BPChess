@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -33,13 +35,11 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private static final String AUTHOR = "Ronit and Banuel";
 
 
-    public UCI(InputStream in, PrintStream out, ContextService contextService, PrintWriter chessLog) {
+    public UCI(InputStream in, PrintStream out, PrintWriter chessLog) {
         this.in = in;
         this.out = out;
         this.scanner = new Scanner(in);
         this.logger = chessLog;
-        this.contextService = contextService;
-        this.bprog = contextService.getBProgram();
     }
 
     @Override
@@ -97,6 +97,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     }
 
     public void newGame() {
+        contextService = ContextService.getInstance();
+        this.bprog = contextService.getBProgram();
         contextService.initFromResources("ContextDB", "ContextualChess-Population.js", "ContextualChess.js");
         bprog = contextService.getBProgram();
         bprog.setWaitForExternalEvents(true);
@@ -149,25 +151,29 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 int x = 0;
                 int y = 7;
                 String piece = "";
+                Piece p;
                 if (line.charAt(j) == 'r') {
                     x = getRow(line, j);
                     y = y - i;
-                    Piece p = new Piece(Piece.Color.black, Piece.Type.rook, bRooks);
+                    p = new Piece(Piece.Color.black, Piece.Type.rook, bRooks);
                     bRooks++;
-                    enqueueInit(x, y, p);
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
-                    Piece p = new Piece(Piece.Color.black, Piece.Type.king, 1);
-                    enqueueInit(x, y, p);
+                    p = new Piece(Piece.Color.black, Piece.Type.king, 1);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
-                    Piece p = new Piece(Piece.Color.white, Piece.Type.king, 1);
-                    enqueueInit(x, y, p);
+                    p = new Piece(Piece.Color.white, Piece.Type.king, 1);
+                } else {
+                    throw  new UnsupportedOperationException("Need to support other types of pieces");
                 }
-            }
 
+                Map<String, Object> parameters =new HashMap<>();
+                parameters.put("piece", p);
+                parameters.put("cell", new Cell(x,y));
+                bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
+            }
         }
     }
 
@@ -180,10 +186,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 sum++;
         }
         return sum;
-    }
-
-    private void enqueueInit(int x, int y, Piece piece) {
-        bprog.enqueueExternalEvent(new Move(new Cell(-1,-1), new Cell(x,y), piece));
     }
 
     private void quit() {

@@ -47,6 +47,7 @@ public class Move extends BEvent {
     public static class SamePlaceMoveEventSet implements EventSet {
         @Override
         public boolean contains(BEvent bEvent) {
+            //TODO: change to equals
             return bEvent instanceof Move && ((Move)bEvent).source.i==((Move)bEvent).target.i && ((Move)bEvent).source.j==((Move)bEvent).target.j;
         }
     }

@@ -3,10 +3,6 @@ package il.ac.bgu.cs.bp.bpjs.Chess;
 /**
  * Created by Ronit on 24-Oct-18.
  */
-import il.ac.bgu.cs.bp.bpjs.context.ContextService;
-import il.ac.bgu.cs.bp.bpjs.execution.listeners.PrintBProgramRunnerListener;
-import il.ac.bgu.cs.bp.bpjs.model.BProgram;
-
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +13,7 @@ public class ChessGameMain {
 
     private ChessGameMain() throws FileNotFoundException, UnsupportedEncodingException {
         chessLog = new PrintWriter("chess.log","UTF-8");
-        this.uci = new UCI(System.in, System.out, ContextService.getInstance(), chessLog);
+        this.uci = new UCI(System.in, System.out, chessLog);
     }
 
     private void  run() {

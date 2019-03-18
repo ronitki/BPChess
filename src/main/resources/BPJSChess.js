@@ -298,6 +298,18 @@ bp.registerBThread("EnforceTurns", function () {
     }
 });
 
+bp.registerBThread("Wait For Color", function () {
+    var color = bp.sync({waitFor: [bp.Event("color","black"),bp.Event("color","white")]}).data;
+
+    bp.registerBThread("Wait For My Turn", function () {
+        while (true) {
+            bp.sync({waitFor: bp.Event("My Turn"), block: isMyMove(color)});
+            bp.sync({waitFor: isMyMove(color)});
+
+        }
+    });
+});
+
 bp.registerBThread("Wait For My Turn", function () {
     bp.sync({waitFor: bp.Event("game_start")});
     while (true) {
