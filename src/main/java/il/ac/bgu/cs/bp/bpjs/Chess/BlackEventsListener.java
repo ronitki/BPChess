@@ -4,7 +4,7 @@ package il.ac.bgu.cs.bp.bpjs.Chess;
  * Created by Ronit on 24-Oct-18.
  */
 
-import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
@@ -21,8 +21,7 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
     public void eventSelected(BProgram bp, BEvent theEvent) {
         if (theEvent instanceof Move) {
             Move mv = (Move) theEvent;
-            if (mv.piece.color == Piece.Color.black) {
-//                System.out.println("From Black " + mv);
+            if (mv.piece.color == Color.black) {
                 uci.sendMove(MoveTranslator.MoveToString(mv));
             }
         }

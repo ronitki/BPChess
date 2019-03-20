@@ -1,10 +1,10 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
-import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Piece;
-import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Type;
 import il.ac.bgu.cs.bp.bpjs.context.ContextService;
-import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.BProgramRunnerListenerAdapter;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.PrintBProgramRunnerListener;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
@@ -155,16 +155,16 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 if (line.charAt(j) == 'r') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Piece.Color.black, Piece.Type.rook, bRooks);
+                    p = new Piece(Color.black, Type.Rook, bRooks);
                     bRooks++;
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Piece.Color.black, Piece.Type.king, 1);
+                    p = new Piece(Color.black, Type.King, 1);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Piece.Color.white, Piece.Type.king, 1);
+                    p = new Piece(Color.white, Type.King, 1);
                 } else {
                     throw  new UnsupportedOperationException("Need to support other types of pieces");
                 }

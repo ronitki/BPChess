@@ -1,7 +1,8 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.events;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
-import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.eventsets.EventSet;
 
@@ -72,9 +73,9 @@ public class Move extends BEvent {
     }
 
     public static class ColorMoveEventSet implements EventSet {
-        private final Piece.Color c;
+        private final Color c;
 
-        public ColorMoveEventSet(Piece.Color c) {
+        public ColorMoveEventSet(Color c) {
             this.c = c;
         }
 

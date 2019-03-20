@@ -1,10 +1,19 @@
-var size = 8; 
+var size = 8;
+
+function registerAllPieceTypesQueries() {
+    var types = Type.values();
+    for (var c = 0; c < types.length; c++) {
+        CTX_instance.registerParameterizedContextQuery("PieceOfType", types[c].toString(), {
+            "type": types[c]
+        });
+    }
+}
 
 function registerAllCellsQueries(cells, pieces) {
-    for (var c = 0; c < size; c++) {
-        CTX_instance.registerParameterizedContextQuery("SpecificCell", "Cell[" + c.i + "," + c.j + "]", {
-            "i": c.i,
-            "j": c.j
+    for (var c = 0; c < cells.length; c++) {
+        CTX_instance.registerParameterizedContextQuery("SpecificCell", "Cell[" + cells[c].i + "," + cells[c].j + "]", {
+            "i": cells[c].i,
+            "j": cells[c].j
         });
     }
     for (var p = 0; p < pieces.length; p++) {
@@ -25,13 +34,14 @@ bp.registerBThread("PopulateDB", function() {
     }
 
     var pieces = [];
-    var colors = [Piece.Color.white, Piece.Color.black];
+    var colors = [Color.white, Color.black];
     for (color = 0; color < 2; color++) {
         for (i = 0; i < size; i++) {
-            pieces.push(new Piece(colors[color], Piece.Type.pawn, i));
+            pieces.push(new Piece(colors[color], Type.Pawn, i));
         }
     }
 
+    registerAllPieceTypesQueries();
     registerAllCellsQueries(cells, pieces);
 
     bp.sync({ request: CTX.InsertEvent(cells) });

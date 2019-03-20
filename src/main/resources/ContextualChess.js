@@ -2,6 +2,7 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
 
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.context);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema);
+importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
 
 //#region HELP FUNCTIONS
 function getCell(i, j) {
@@ -16,24 +17,24 @@ function getCellWithPiece(p) {
 //#region GameRules
 bp.registerBThread("EnforceTurns", function () {
     while (true) {
-        bp.sync({waitFor: ColorMoveEventSet(Piece.Color.white), block: ColorMoveEventSet(Piece.Color.black)});
-        bp.sync({waitFor: ColorMoveEventSet(Piece.Color.black), block: ColorMoveEventSet(Piece.Color.white)});
+        bp.sync({waitFor: Move.ColorMoveEventSet(Color.white), block: Move.ColorMoveEventSet(Color.black)});
+        bp.sync({waitFor: Move.ColorMoveEventSet(Color.black), block: Move.ColorMoveEventSet(Color.white)});
 
     }
 });
 
 bp.registerBThread("block moving to the same place", function () {
-    bp.sync({block: SamePlaceMoveEventSet()});
+    bp.sync({block: Move.SamePlaceMoveEventSet()});
 });
 
 
-CTX.subscribe("Kill piece", "Piece", function (p) {
+CTX.subscribe("Kill piece", "piece", function (p) {
     bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
     bp.sync({block: Move.PieceMoveEventSet(p)});
 });
 
 bp.registerBThread("block out of board moves", function () {
-    bp.sync({block: OutOfBoardMoveEventSet()});
+    bp.sync({block: Move.OutOfBoardMoveEventSet()});
 });
 
 
@@ -172,10 +173,10 @@ CTX.subscribe("AskMove", "Rook", function (r) {
 //         var c = getCell(i+1, cell.j);
 //         if (c.piece != null) {
 //             if (c.piece.color != color) {
-//                 if (c.piece.type === Piece.Type.queen || c.piece.type === Piece.Type.rook) {
+//                 if (c.piece.type === piece.Type.queen || c.piece.type === piece.Type.rook) {
 //                     return true;
 //                 }
-//                 if (c.piece.type === Piece.Type.king && i + 1 === c.i) {
+//                 if (c.piece.type === piece.Type.king && i + 1 === c.i) {
 //                     return true;
 //                 }
 //             }
@@ -186,10 +187,10 @@ CTX.subscribe("AskMove", "Rook", function (r) {
 //         var c = getCell(i, cell.j);
 //         if (c.piece != null) {
 //             if (c.piece.color != color) {
-//                 if (c.piece.type === Piece.Type.queen || c.piece.type === Piece.Type.rook) {
+//                 if (c.piece.type === piece.Type.queen || c.piece.type === piece.Type.rook) {
 //                     return true;
 //                 }
-//                 if (c.piece.type === Piece.Type.king && i - 1 === c.i) {
+//                 if (c.piece.type === piece.Type.king && i - 1 === c.i) {
 //                     return true;
 //                 }
 //             }
@@ -200,10 +201,10 @@ CTX.subscribe("AskMove", "Rook", function (r) {
 //         var c = getCell(cell.i, j);
 //         if (c.piece != null) {
 //             if (c.piece.color != color) {
-//                 if (c.piece.type === Piece.Type.queen || c.piece.type === Piece.Type.rook) {
+//                 if (c.piece.type === piece.Type.queen || c.piece.type === piece.Type.rook) {
 //                     return true;
 //                 }
-//                 if (c.piece.type === Piece.Type.king && j + 1 === c.j) {
+//                 if (c.piece.type === piece.Type.king && j + 1 === c.j) {
 //                     return true;
 //                 }
 //             }
@@ -214,10 +215,10 @@ CTX.subscribe("AskMove", "Rook", function (r) {
 //         var c = getCell(cell.i, j);
 //         if (c.piece != null) {
 //             if (c.piece.color != color) {
-//                 if (c.piece.type === Piece.Type.queen || c.piece.type === Piece.Type.rook) {
+//                 if (c.piece.type === piece.Type.queen || c.piece.type === piece.Type.rook) {
 //                     return true;
 //                 }
-//                 if (c.piece.type === Piece.Type.king && j - 1 === c.j) {
+//                 if (c.piece.type === piece.Type.king && j - 1 === c.j) {
 //                     return true;
 //                 }
 //             }
@@ -228,10 +229,10 @@ CTX.subscribe("AskMove", "Rook", function (r) {
 //         var c = getCell(i, j);
 //         if (c.piece != null) {
 //             if (c.piece.color != color) {
-//                 if (c.piece.type === Piece.Type.queen || c.piece.type === Piece.Type.bishop) {
+//                 if (c.piece.type === piece.Type.queen || c.piece.type === piece.Type.bishop) {
 //                     return true;
 //                 }
-//                 if (c.piece.type === Piece.Type.king && cell.i + 1 === c.i && cell.j +1 === c.j) {
+//                 if (c.piece.type === piece.Type.king && cell.i + 1 === c.i && cell.j +1 === c.j) {
 //                     return true;
 //                 }
 //             }

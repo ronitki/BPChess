@@ -275,7 +275,7 @@ function kingBTs(color) {
 
 function initPiecesBTs() {
     var colors = [Piece.Color.black];
-    // var colors = [Piece.Color.black, Piece.Color.white];
+    // var colors = [piece.Color.black, piece.Color.white];
     for (var i = 0; i < colors.length; i++) {
         kingBTs(colors[i]);
         for (var j = 1; j <= 2; j++) {
@@ -326,10 +326,10 @@ bp.registerBThread("block moving to the same place", function () {
 
 // bp.registerBThread("init_Start_thread", function () {
 //     bp.sync({waitFor: bp.Event("init_start")});
-//     bp.sync({request: Init(4, 4, new Piece(Piece.Color.black, Piece.Type.rook, 1))});
-//     bp.sync({request: Init(6, 5, new Piece(Piece.Color.white, Piece.Type.king, 1))});
-//     bp.sync({request: Init(5, 4, new Piece(Piece.Color.black, Piece.Type.rook, 2))});
-//     bp.sync({request: Init(5, 5, new Piece(Piece.Color.black, Piece.Type.king, 1))});
+//     bp.sync({request: Init(4, 4, new piece(piece.Color.black, piece.Type.rook, 1))});
+//     bp.sync({request: Init(6, 5, new piece(piece.Color.white, piece.Type.king, 1))});
+//     bp.sync({request: Init(5, 4, new piece(piece.Color.black, piece.Type.rook, 2))});
+//     bp.sync({request: Init(5, 5, new piece(piece.Color.black, piece.Type.king, 1))});
 //     bp.sync({request: bp.Event("init_end")});
 // });
 

@@ -1,5 +1,7 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.context.schema;
 
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
+
 import javax.persistence.*;
 
 @Entity

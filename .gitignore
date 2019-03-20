@@ -14,6 +14,9 @@
 # Maven
 log/
 target/
+
+# bpjs
+*.db
 arenalinux_64bit_1.1.tar.gz
 arena/
 changelog*

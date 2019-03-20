@@ -1,7 +1,9 @@
 package il.ac.bgu.cs.bp.bpjs.Chess;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
-import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Type;
 import il.ac.bgu.cs.bp.bpjs.Chess.events.Move;
 
 public class MoveTranslator {
@@ -18,6 +20,6 @@ public class MoveTranslator {
     }
 
     public static Move StringToMove(String move) {
-        return new Move(new Cell(ChartoNumber(move.charAt(0)), Character.getNumericValue(move.charAt(1)) - 1), new Cell(ChartoNumber(move.charAt(2)), Character.getNumericValue(move.charAt(3)) - 1), new Piece(Piece.Color.white, Piece.Type.king, 1));
+        return new Move(new Cell(ChartoNumber(move.charAt(0)), Character.getNumericValue(move.charAt(1)) - 1), new Cell(ChartoNumber(move.charAt(2)), Character.getNumericValue(move.charAt(3)) - 1), new Piece(Color.white, Type.King, 1));
     }
 }
