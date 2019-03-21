@@ -7,7 +7,7 @@ import javax.persistence.MappedSuperclass;
 @SuppressWarnings("WeakerAccess")
 public abstract class BasicEntity {
     @Id
-    private final String id;
+    public final String id;
 
     protected BasicEntity() {
         id = "";
@@ -27,10 +27,6 @@ public abstract class BasicEntity {
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
-    }
-
-    public String getId() {
-        return id;
     }
 
     @Override

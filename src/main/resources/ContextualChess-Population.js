@@ -1,50 +1,48 @@
 var size = 8;
 
-function registerAllPieceTypesQueries() {
-    var types = Type.values();
-    for (var c = 0; c < types.length; c++) {
-        CTX_instance.registerParameterizedContextQuery("PieceOfType", types[c].toString(), {
-            "type": types[c]
-        });
+function createCells() {
+    var cells = [], i, j;
+    for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            CTX_instance.registerParameterizedContextQuery("SpecificCell", "Cell(" + i + "," + j + ")", {
+                "i": i,
+                "j": j
+            });
+            cells.push(new Cell(i, j));
+        }
     }
+    return cells;
 }
 
-function registerAllCellsQueries(cells, pieces) {
-    for (var c = 0; c < cells.length; c++) {
-        CTX_instance.registerParameterizedContextQuery("SpecificCell", "Cell[" + cells[c].i + "," + cells[c].j + "]", {
-            "i": cells[c].i,
-            "j": cells[c].j
-        });
+function createPieces() {
+    var types = Type.values();
+    var colors = Color.values();
+    var pieces = [];
+    var piece;
+    for (var c = 0; c < colors.length; c++) {
+        for (var t = 0; t < types.length; t++) {
+            var type = types[t];
+            for (var n = 0; n < type.Count; n++) {
+                piece = new Piece(colors[c], type, n+1);
+
+                CTX_instance.registerParameterizedContextQuery("PieceOfType", type.toString(), {
+                    "type": type
+                });
+                CTX_instance.registerParameterizedContextQuery("CellWithPiece", "CellWithPiece("+piece.toString()+")", {
+                    "p": piece
+                });
+                pieces.push(piece);
+            }
+        }
     }
-    for (var p = 0; p < pieces.length; p++) {
-        CTX_instance.registerParameterizedContextQuery("CellWithPiece", "CellWithPiece["+pieces[p].toString()+"]", {
-            "p": pieces[p]
-        });
-    }
+    return pieces;
 }
 
 bp.registerBThread("PopulateDB", function() {
-    var cells = [], i = 0, row, cell;
-    for (i = 0; i < size; i++) {
-        row = [];
-        for (j = 0; j < size; j++) {
-            cell = new Cell(i, j);
-            cells.push(cell);
-        }
-    }
-
-    var pieces = [];
-    var colors = [Color.white, Color.black];
-    for (color = 0; color < 2; color++) {
-        for (i = 0; i < size; i++) {
-            pieces.push(new Piece(colors[color], Type.Pawn, i));
-        }
-    }
-
-    registerAllPieceTypesQueries();
-    registerAllCellsQueries(cells, pieces);
+    var cells = createCells();
+    var pieces = createPieces();
 
     bp.sync({ request: CTX.InsertEvent(cells) });
-
+    bp.sync({ request: CTX.InsertEvent(pieces) });
     bp.sync({ request: bp.Event("Context Population Ended") });
 });

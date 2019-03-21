@@ -6,10 +6,10 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
 
 //#region HELP FUNCTIONS
 function getCell(i, j) {
-    return CTX.getContextsOfType("Cell[" + i + "," + j + "]").get(0);
+    return CTX.getContextsOfType("Cell(" + i + "," + j + ")").get(0);
 }
 function getCellWithPiece(p) {
-    return CTX.getContextsOfType("CellWithPiece[" + p + "]").get(0);
+    return CTX.getContextsOfType("CellWithPiece(" + p + ")").get(0);
 }
 //#endregion HELP FUNCTIONS
 
@@ -17,8 +17,8 @@ function getCellWithPiece(p) {
 //#region GameRules
 bp.registerBThread("EnforceTurns", function () {
     while (true) {
-        bp.sync({waitFor: Move.ColorMoveEventSet(Color.white), block: Move.ColorMoveEventSet(Color.black)});
-        bp.sync({waitFor: Move.ColorMoveEventSet(Color.black), block: Move.ColorMoveEventSet(Color.white)});
+        bp.sync({waitFor: Move.ColorMoveEventSet(Color.White), block: Move.ColorMoveEventSet(Color.Black)});
+        bp.sync({waitFor: Move.ColorMoveEventSet(Color.Black), block: Move.ColorMoveEventSet(Color.White)});
 
     }
 });
@@ -53,6 +53,7 @@ bp.registerBThread("delete piece upon eating", function () {
 
 //#region RookBehaviors
 CTX.subscribe("AskMove", "Rook", function (r) {
+    bp.sync({ wait: bp.Event("Context Population Ended") });
     while (true) {
         var r_c = getCellWithPiece(r);
         var cells = [];

@@ -19,20 +19,16 @@ public class Piece extends BasicEntity {
         this(null, null, -1);
     }
 
-    //    @Column
     @Enumerated(EnumType.STRING)
     public final Color color;
-//    @Column
+
     @Enumerated(EnumType.STRING)
     public final Type type;
-//    @Column
-//    public final int uid;
 
     public Piece(Color color, Type type, int id) {
         super(color + "_" + type + "_" + id);
         this.color = color;
         this.type = type;
-//        this.uid = id;
     }
 }
 

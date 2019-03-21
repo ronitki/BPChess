@@ -20,6 +20,6 @@ public class MoveTranslator {
     }
 
     public static Move StringToMove(String move) {
-        return new Move(new Cell(ChartoNumber(move.charAt(0)), Character.getNumericValue(move.charAt(1)) - 1), new Cell(ChartoNumber(move.charAt(2)), Character.getNumericValue(move.charAt(3)) - 1), new Piece(Color.white, Type.King, 1));
+        return new Move(new Cell(ChartoNumber(move.charAt(0)), Character.getNumericValue(move.charAt(1)) - 1), new Cell(ChartoNumber(move.charAt(2)), Character.getNumericValue(move.charAt(3)) - 1), new Piece(Color.White, Type.King, 1));
     }
 }

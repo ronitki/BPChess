@@ -155,16 +155,16 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 if (line.charAt(j) == 'r') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Color.black, Type.Rook, bRooks);
+                    p = new Piece(Color.Black, Type.Rook, bRooks);
                     bRooks++;
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Color.black, Type.King, 1);
+                    p = new Piece(Color.Black, Type.King, 1);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
-                    p = new Piece(Color.white, Type.King, 1);
+                    p = new Piece(Color.White, Type.King, 1);
                 } else {
                     throw  new UnsupportedOperationException("Need to support other types of pieces");
                 }

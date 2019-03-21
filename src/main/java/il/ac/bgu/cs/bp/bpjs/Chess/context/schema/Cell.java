@@ -30,7 +30,7 @@ public class Cell extends BasicEntity {
     }
 
     public Cell(int i, int j, Piece p) {
-        super("cell(" + i + "," + j + ")");
+        super("Cell(" + i + "," + j + ")");
         this.i = i;
         this.j = j;
         this.piece = p;
@@ -38,6 +38,6 @@ public class Cell extends BasicEntity {
 
     @Override
     public String toString() {
-        return "cell(" + i + "," + j + ")" + (piece == null ? "Empty" : piece.toString());
+        return "Cell(" + i + "," + j + "):" + (piece == null ? "Empty" : piece.toString());
     }
 }
