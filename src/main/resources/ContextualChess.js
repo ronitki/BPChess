@@ -56,6 +56,9 @@ CTX.subscribe("AskMove", "Rook", function (r) {
     bp.sync({ wait: bp.Event("Context Population Ended") });
     while (true) {
         var r_c = getCellWithPiece(r);
+        if(r_c == null) { // If the piece is not on board
+            break;
+        }
         var cells = [];
         //right
         for (var i = r_c.i; i < size; i++) {
