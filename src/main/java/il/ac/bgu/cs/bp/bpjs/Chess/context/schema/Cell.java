@@ -19,7 +19,7 @@ public class Cell extends BasicEntity {
     @Column
     public final int j;
     @OneToOne
-    public final Piece piece;
+    public Piece piece;
 
     protected Cell() {
         this(0, 0, null);
@@ -38,6 +38,10 @@ public class Cell extends BasicEntity {
 
     @Override
     public String toString() {
-        return "Cell(" + i + "," + j + "):" + (piece == null ? "Empty" : piece.toString());
+        String ans="Cell(" + i + "," + j + "):";
+//        if(piece ==null){
+//            return ans+"Empty";
+//        }
+        return ans+ piece;
     }
 }

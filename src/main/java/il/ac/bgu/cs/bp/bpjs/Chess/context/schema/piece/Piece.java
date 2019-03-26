@@ -30,5 +30,6 @@ public class Piece extends BasicEntity {
         this.color = color;
         this.type = type;
     }
+
 }
 

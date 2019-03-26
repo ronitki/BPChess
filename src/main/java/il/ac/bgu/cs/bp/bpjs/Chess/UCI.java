@@ -134,10 +134,14 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         }
 
         if (input.contains("moves")) {
+            bprog.enqueueExternalEvent(new BEvent("color","black"));
             input = input.substring(input.length() - 5, input.length() - 1);
             if (input.length() > 0) {
                 bprog.enqueueExternalEvent(StringToMove(input));
             }
+        }
+        else{
+            bprog.enqueueExternalEvent(new BEvent("color","white"));
         }
 
     }
@@ -157,26 +161,31 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                     y = y - i;
                     p = new Piece(Color.Black, Type.Rook, bRooks);
                     bRooks++;
+                    insert(p,x,y);
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
                     p = new Piece(Color.Black, Type.King, 1);
+                    insert(p,x,y);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
                     p = new Piece(Color.White, Type.King, 1);
-                } else {
+                    insert(p,x,y);
+                } else if (!Character.isDigit(line.charAt(j))){
                     throw  new UnsupportedOperationException("Need to support other types of pieces");
                 }
 
-                Map<String, Object> parameters =new HashMap<>();
-                parameters.put("piece", p);
-                parameters.put("cell", new Cell(x,y));
-                bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
+
             }
         }
     }
-
+    private void insert (Piece p, int x, int y) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("piece", p);
+        parameters.put("cell", new Cell(x, y));
+        bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
+    }
     private int getRow(String line, int index) {
         int sum = 0;
         for (int i = 0; i < index; i++) {

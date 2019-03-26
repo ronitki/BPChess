@@ -21,9 +21,7 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
     public void eventSelected(BProgram bp, BEvent theEvent) {
         if (theEvent instanceof Move) {
             Move mv = (Move) theEvent;
-            if (mv.piece.color == Color.Black) {
                 uci.sendMove(MoveTranslator.MoveToString(mv));
-            }
         }
     }
 }

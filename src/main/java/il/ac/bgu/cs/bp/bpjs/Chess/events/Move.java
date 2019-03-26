@@ -92,4 +92,5 @@ public class Move extends BEvent {
             return bEvent instanceof Move && ((Move)bEvent).target.piece!=null;
         }
     }
+
 }

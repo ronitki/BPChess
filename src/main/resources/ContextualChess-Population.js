@@ -31,6 +31,7 @@ function createPieces() {
                 CTX_instance.registerParameterizedContextQuery("CellWithPiece", "CellWithPiece("+piece.toString()+")", {
                     "p": piece
                 });
+
                 pieces.push(piece);
             }
         }
@@ -41,7 +42,6 @@ function createPieces() {
 bp.registerBThread("PopulateDB", function() {
     var cells = createCells();
     var pieces = createPieces();
-
     bp.sync({ request: CTX.InsertEvent(cells) });
     bp.sync({ request: CTX.InsertEvent(pieces) });
     bp.sync({ request: bp.Event("Context Population Ended") });

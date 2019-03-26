@@ -4,12 +4,17 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.context);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
 
+var myColor;
 //#region HELP FUNCTIONS
 function getCell(i, j) {
     return CTX.getContextsOfType("Cell(" + i + "," + j + ")").get(0);
 }
 function getCellWithPiece(p) {
-    return CTX.getContextsOfType("CellWithPiece(" + p + ")").get(0);
+    try {
+        return CTX.getContextsOfType("CellWithPiece(" + p + ")").get(0);
+    } catch (e) {
+        return null;
+    }
 }
 //#endregion HELP FUNCTIONS
 
@@ -22,6 +27,20 @@ bp.registerBThread("EnforceTurns", function () {
 
     }
 });
+
+bp.registerBThread("GetMyColor", function () {
+     myColor=bp.sync({waitFor: [bp.Event("color","black"),bp.Event("color","white")]}).data;
+     if(myColor==="black")
+         myColor=Color.Black;
+     else
+         myColor=Color.White;
+    while (true) {
+        bp.sync({waitFor: bp.Event("My Turn"), block: Move.ColorMoveEventSet(myColor)});
+        bp.sync({waitFor: Move.ColorMoveEventSet(myColor)});
+
+    }
+});
+
 
 bp.registerBThread("block moving to the same place", function () {
     bp.sync({block: Move.SamePlaceMoveEventSet()});
@@ -53,9 +72,12 @@ bp.registerBThread("delete piece upon eating", function () {
 
 //#region RookBehaviors
 CTX.subscribe("AskMove", "Rook", function (r) {
-    bp.sync({ wait: bp.Event("Context Population Ended") });
+    bp.sync({ waitFor: bp.Event("Context Population Ended") });
+    bp.sync({ waitFor: bp.Event("init_end") });
+
     while (true) {
         var r_c = getCellWithPiece(r);
+        bp.log.info(r.color);
         if(r_c == null) { // If the piece is not on board
             break;
         }
@@ -105,10 +127,12 @@ CTX.subscribe("AskMove", "Rook", function (r) {
             cells.push(c);
         }
 
+
         var legalMoves = cells.map(function (c) {
             Move(r_c, c, r)
         });
-        bp.sync({request: [legalMoves], waitFor: Move.AnyMoveEventSet(), interrupt: CTX.ContextEnded("Piece", p)});
+        bp.sync({request: [legalMoves], waitFor: Move.AnyMoveEventSet()});
+        //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
     }
 });
 //#endregion RookBehaviors
