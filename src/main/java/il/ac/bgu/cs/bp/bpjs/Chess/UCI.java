@@ -186,6 +186,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         parameters.put("cell", new Cell(x, y));
         bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
     }
+
     private int getRow(String line, int index) {
         int sum = 0;
         for (int i = 0; i < index; i++) {

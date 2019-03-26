@@ -11,8 +11,9 @@ import javax.persistence.*;
         @NamedQuery(name = "EmptyCell", query = "SELECT c FROM Cell c WHERE c.piece is null"),
         @NamedQuery(name = "SpecificCell", query = "SELECT c FROM Cell c WHERE c.i=:i AND c.j=:j"),
         @NamedQuery(name = "CellWithPiece", query = "SELECT c FROM Cell c WHERE c.piece=:p"),
-        @NamedQuery(name = "UpdateCell", query = "Update Cell C set C.piece=:piece where C=:cell"),
+        @NamedQuery(name = "UpdateCell", query = "Update Cell c set c.piece=:piece where c=:cell"),
 })
+
 public class Cell extends BasicEntity {
     @Column
     public final int i;
@@ -21,6 +22,9 @@ public class Cell extends BasicEntity {
     @OneToOne
     public Piece piece;
 
+    public void setPiece (Piece p){
+        this.piece = p;
+    }
     protected Cell() {
         this(0, 0, null);
     }
@@ -39,9 +43,9 @@ public class Cell extends BasicEntity {
     @Override
     public String toString() {
         String ans="Cell(" + i + "," + j + "):";
-//        if(piece ==null){
-//            return ans+"Empty";
-//        }
+        if(piece ==null){
+            return ans+"Empty";
+        }
         return ans+ piece;
     }
 }

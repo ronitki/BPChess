@@ -22,6 +22,7 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
         if (theEvent instanceof Move) {
             Move mv = (Move) theEvent;
                 uci.sendMove(MoveTranslator.MoveToString(mv));
+                //TODO: update the db about the move selected
         }
     }
 }

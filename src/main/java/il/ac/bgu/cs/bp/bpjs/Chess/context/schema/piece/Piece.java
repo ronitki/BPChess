@@ -5,6 +5,7 @@ package il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece;
  */
 
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.BasicEntity;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
 
 import javax.persistence.*;
 
@@ -24,6 +25,7 @@ public class Piece extends BasicEntity {
 
     @Enumerated(EnumType.STRING)
     public final Type type;
+
 
     public Piece(Color color, Type type, int id) {
         super(color + "_" + type + "_" + id);

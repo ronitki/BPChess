@@ -71,13 +71,11 @@ bp.registerBThread("delete piece upon eating", function () {
 //#endregion GameRules
 
 //#region RookBehaviors
-CTX.subscribe("AskMove", "Rook", function (r) {
+CTX.subscribe("AskMoveForRook", "Rook", function (r) {
     bp.sync({ waitFor: bp.Event("Context Population Ended") });
     bp.sync({ waitFor: bp.Event("init_end") });
-
     while (true) {
         var r_c = getCellWithPiece(r);
-        bp.log.info(r.color);
         if(r_c == null) { // If the piece is not on board
             break;
         }
@@ -388,7 +386,9 @@ function kingController(currentCell,currentColor){
     return (!checkRight(currentCell,currentColor) &&!checkLeft(currentCell,currentColor) && !checkUp(currentCell,currentColor) && !checkDown(currentCell,currentColor) &&!checkUpLeft(currentCell,currentColor) && !checkUpRight(currentCell,currentColor)&& !checkDownLeft(currentCell,currentColor) &&!checkDownRight(currentCell,currentColor) && !checkKnights(currentCell,currentColor));
 }
 
-CTX.subscribe("AskMove", "King", function (k) {
+CTX.subscribe("AskMoveForKing", "King", function (k) {
+    bp.sync({ waitFor: bp.Event("Context Population Ended") });
+    bp.sync({ waitFor: bp.Event("init_end") });
     while (true) {
         var kingCell = getCellWithPiece(k);
         var cells = [];
