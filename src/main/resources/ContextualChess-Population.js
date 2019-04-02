@@ -31,8 +31,11 @@ function createPieces() {
                 CTX_instance.registerParameterizedContextQuery("CellWithPiece", "CellWithPiece("+piece.toString()+")", {
                     "p": piece
                 });
-                CTX_instance.registerParameterizedContextQuery("CellWithColor", "CellWithPieceWhite("+ colors[c] +")", {
+                CTX_instance.registerParameterizedContextQuery("CellWithColor", "CellWithColor("+ colors[c] +")", {
                     "color" : colors[c]
+                });
+                CTX_instance.registerParameterizedContextQuery("CellWithType", "CellWithType("+ type +")", {
+                    "type" : type
                 });
                 pieces.push(piece);
             }

@@ -28,6 +28,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private Scanner scanner;
     private PrintWriter logger;
     private boolean wasInitialized=false;
+    private boolean wasInitEnded=false;
     private ContextService contextService;
     private BProgram bprog;
 
@@ -115,6 +116,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
 
         //restart the main
         wasInitialized=false;
+        wasInitEnded=false;
 
     }
 
@@ -130,7 +132,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             input = input.substring(4);
             String fenBoard = input.substring(0, input.indexOf(" w"));
             splitFen(fenBoard);
-            bprog.enqueueExternalEvent(new BEvent("init_end"));
+           // bprog.enqueueExternalEvent(new BEvent("init_end"));
         }
 
         if (input.contains("moves")) {
@@ -143,7 +145,10 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         else{
             bprog.enqueueExternalEvent(new BEvent("color","white"));
         }
-
+        if(!wasInitEnded) {
+            bprog.enqueueExternalEvent(new BEvent("init_end"));
+            wasInitEnded=true;
+        }
     }
 
     private void splitFen(String fen) {
@@ -183,8 +188,9 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private void insert (Piece p, int x, int y) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("piece", p);
-        parameters.put("cell", new Cell(x, y));
+        parameters.put("cell", new Cell(x, y,p));
         bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
+       // bprog.enqueueExternalEvent(new ContextService.AnyUpdateContextDBEvent("Cell"));
     }
 
     private int getRow(String line, int index) {

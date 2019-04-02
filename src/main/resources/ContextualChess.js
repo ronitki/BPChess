@@ -5,6 +5,7 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
 
 var myColor;
+var otherColor;
 //#region HELP FUNCTIONS
 function getCell(i, j) {
     return CTX.getContextsOfType("Cell(" + i + "," + j + ")").get(0);
@@ -16,15 +17,31 @@ function getCellWithPiece(p) {
         return null;
     }
 }
-function CellWithPiece(c) {
+function getCellWithColor(c) {
     try {
-        return CTX.getContextsOfType("CellWithPieceWhite(" + c + ")");
+        return CTX.getContextsOfType("CellWithColor(" + c + ")");
     } catch (e) {
         return null;
     }
 }
-function getCellWhites() {
-    return CTX.getContextsOfType("NonEmptyCellWhite");
+function getCellWithType(t) {
+    try {
+        return CTX.getContextsOfType("CellWithType(" + t + ")");
+    } catch (e) {
+        return null;
+    }
+}
+
+function getNonEmpty() {
+    try {
+        return CTX.getContextsOfType("NonEmptyCell");
+    } catch (e) {
+        return null;
+    }
+}
+
+function isNonEmpty(cell){
+    return getNonEmpty().contains(cell);
 }
 
 
@@ -42,16 +59,42 @@ bp.registerBThread("EnforceTurns", function () {
 
 bp.registerBThread("GetMyColor", function () {
      myColor=bp.sync({waitFor: [bp.Event("color","black"),bp.Event("color","white")]}).data;
-     if(myColor==="black")
-         myColor=Color.Black;
-     else
-         myColor=Color.White;
-    while (true) {
+     if(myColor==="black") {
+         myColor = Color.Black;
+         otherColor=Color.White;
+     }
+     else {
+         myColor = Color.White;
+         otherColor=Color.Black;
+     }
+
+        while (true) {
         bp.sync({waitFor: bp.Event("My Turn"), block: Move.ColorMoveEventSet(myColor)});
         bp.sync({waitFor: Move.ColorMoveEventSet(myColor)});
 
     }
 });
+function isOtherColor(cell,color){
+bp.log.info("infunction")
+
+    bp.log.info(getCellWithColor(color));
+    bp.log.info(color);
+
+
+
+    return getCellWithColor(color).contains(cell);
+}
+
+function getOppositeColor(cell){
+
+    if (getCellWithColor(Color.Black).contains(cell))
+        return Color.White;
+    return Color.Black;
+
+}
+
+
+
 
 
 bp.registerBThread("block moving to the same place", function () {
@@ -88,39 +131,51 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
     bp.sync({ waitFor: bp.Event("init_end") });
     while (true) {
         var r_c = getCellWithPiece(r);
-        bp.log.info("Whites: "+ CellWithPiece(Color.White));
-        bp.log.info("Blacks: "+ CellWithPiece(Color.Black));
+
         if(r_c == null) { // If the piece is not on board
             break;
         }
         var cells = [];
         //right
-        for (var i = r_c.i; i < size; i++) {
+        for (var i = r_c.i+1; i < size; i++) {
             var c = getCell(i, r_c.j);
-            if (c.piece != null) {
-                if (c.piece.color != r.color) {  //TODO change to not equals
+            bp.log.info("i: "+c.i);
+            if (isNonEmpty(c)) {
+                if (isOtherColor(c,getOppositeColor(r_c))) {
+                    bp.log.info("right: "+c);
+
                     cells.push(c);
                 }
                 break;
             }
             cells.push(c);
+
         }
         //left
-        for (var i = r_c.i; i >= 0; i--) {
+        for (var i = r_c.i-1; i >= 0; i--) {
             var c = getCell(i, r_c.j);
-            if (c.piece != null) {
-                if (!c.piece.color.equals(r.color)) {
+            bp.log.info("left");
+            bp.log.info(i);
+            bp.log.info(r_c.j);
+            if (isNonEmpty(c)) {
+                bp.log.info("left");
+                bp.log.info(c);
+                if (isOtherColor(c,getOppositeColor(r_c))) {
                     cells.push(c);
                 }
                 break;
             }
             cells.push(c);
+
         }
         //up
-        for (var j = r_c.j; j < size; j++) {
+        for (var j = r_c.j+1; j < size; j++) {
             var c = getCell(r_c.i, j);
-            if (c.piece != null) {
-                if (c.piece.color != r.color) {
+
+            if (isNonEmpty(c)) {
+                bp.log.info("up");
+                bp.log.info(c);
+                if (isOtherColor(c,getOppositeColor(r_c))) {
                     cells.push(c);
                 }
                 break;
@@ -128,10 +183,14 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
             cells.push(c);
         }
         //down
-        for (var j = r_c.j; j >= 0; j--) {
+        for (var j = r_c.j-1; j >= 0; j--) {
             var c = getCell(r_c.i, j);
-            if (c.piece != null) {
-                if (c.piece.color != r.color) {
+            bp.log.info(c);
+
+            if (isNonEmpty(c)) {
+                bp.log.info("down");
+                bp.log.info(c);
+                if (isOtherColor(c,getOppositeColor(r_c))) {
                     cells.push(c);
                 }
                 break;
@@ -143,7 +202,9 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
         var legalMoves = cells.map(function (c) {
             Move(r_c, c, r)
         });
-        bp.sync({request: [legalMoves], waitFor: Move.AnyMoveEventSet()});
+
+        bp.log.info("legal moves: "+cells);
+       // bp.sync({request: [legalMoves], waitFor: Move.AnyMoveEventSet()});
         //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
     }
 });
@@ -400,47 +461,47 @@ function kingController(currentCell,currentColor){
     return (!checkRight(currentCell,currentColor) &&!checkLeft(currentCell,currentColor) && !checkUp(currentCell,currentColor) && !checkDown(currentCell,currentColor) &&!checkUpLeft(currentCell,currentColor) && !checkUpRight(currentCell,currentColor)&& !checkDownLeft(currentCell,currentColor) &&!checkDownRight(currentCell,currentColor) && !checkKnights(currentCell,currentColor));
 }
 
-CTX.subscribe("AskMoveForKing", "King", function (k) {
-    bp.sync({ waitFor: bp.Event("Context Population Ended") });
-    bp.sync({ waitFor: bp.Event("init_end") });
-    while (true) {
-        var kingCell = getCellWithPiece(k);
-        var cells = [];
-        var currentCell;
-        var currentColor= kingCell.piece.color;
-        if(!kingController(kingCell,currentColor)){
-            //TODO: call chess event
-        }
-        currentCell=getCell(kingCell.i-1,kingCell.j-1);
-        if(kingController(currentCell,currentColor) && checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i,kingCell.j-1 );
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i+1,kingCell.j-1);
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i-1,kingCell.j);
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i+1,kingCell.j);
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i-1,kingCell.j+1);
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i,kingCell.j+1);
-        if(kingController(currentCell,currentColor))
-            cells.push(currentCell);
-        currentCell=getCell(kingCell.i+1,kingCell.j+1);
-        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-            cells.push(currentCell);
-        var legalMoves = cells.map(function (c) {
-            Move(r_c, c, r)
-        });
-        bp.sync({request: [legalMoves], waitFor: AnyMoveEventSet()});
-    }
-});
+// CTX.subscribe("AskMoveForKing", "King", function (k) {
+//     bp.sync({ waitFor: bp.Event("Context Population Ended") });
+//     bp.sync({ waitFor: bp.Event("init_end") });
+//     while (true) {
+//         var kingCell = getCellWithPiece(k);
+//         var cells = [];
+//         var currentCell;
+//         var currentColor= kingCell.piece.color;
+//         if(!kingController(kingCell,currentColor)){
+//             //TODO: call chess event
+//         }
+//         currentCell=getCell(kingCell.i-1,kingCell.j-1);
+//         if(kingController(currentCell,currentColor) && checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i,kingCell.j-1 );
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i+1,kingCell.j-1);
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i-1,kingCell.j);
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i+1,kingCell.j);
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i-1,kingCell.j+1);
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i,kingCell.j+1);
+//         if(kingController(currentCell,currentColor))
+//             cells.push(currentCell);
+//         currentCell=getCell(kingCell.i+1,kingCell.j+1);
+//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+//             cells.push(currentCell);
+//         var legalMoves = cells.map(function (c) {
+//             Move(r_c, c, r)
+//         });
+//         bp.sync({request: [legalMoves], waitFor: AnyMoveEventSet()});
+//     }
+// });
 //#endregion KingBehaviors
 
 

@@ -24,8 +24,10 @@ public class ChessGameMain {
         System.out.println("end of run");
     }
 
+
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         new ChessGameMain().run();
+
 
     }
 }
