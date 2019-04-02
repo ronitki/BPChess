@@ -16,6 +16,18 @@ function getCellWithPiece(p) {
         return null;
     }
 }
+function CellWithPiece(c) {
+    try {
+        return CTX.getContextsOfType("CellWithPieceWhite(" + c + ")");
+    } catch (e) {
+        return null;
+    }
+}
+function getCellWhites() {
+    return CTX.getContextsOfType("NonEmptyCellWhite");
+}
+
+
 //#endregion HELP FUNCTIONS
 
 
@@ -76,6 +88,8 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
     bp.sync({ waitFor: bp.Event("init_end") });
     while (true) {
         var r_c = getCellWithPiece(r);
+        bp.log.info("Whites: "+ CellWithPiece(Color.White));
+        bp.log.info("Blacks: "+ CellWithPiece(Color.Black));
         if(r_c == null) { // If the piece is not on board
             break;
         }

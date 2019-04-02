@@ -1,6 +1,8 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.context.schema;
 
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
+import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
+
 
 import javax.persistence.*;
 
@@ -12,6 +14,10 @@ import javax.persistence.*;
         @NamedQuery(name = "SpecificCell", query = "SELECT c FROM Cell c WHERE c.i=:i AND c.j=:j"),
         @NamedQuery(name = "CellWithPiece", query = "SELECT c FROM Cell c WHERE c.piece=:p"),
         @NamedQuery(name = "UpdateCell", query = "Update Cell c set c.piece=:piece where c=:cell"),
+        @NamedQuery(name = "CellWithColor", query = "SELECT c FROM Cell c WHERE c.piece.color=:color"),
+        @NamedQuery(name = "DeleteCell", query = "DELETE FROM Cell c Where c=:cell"),
+
+
 })
 
 public class Cell extends BasicEntity {
