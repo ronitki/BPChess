@@ -63,8 +63,8 @@ bp.registerBThread("EnforceTurns", function () {
 bp.registerBThread("UpdateMove", function () {
     while (true) {
         var move= bp.sync({waitFor: Move.AnyMoveEventSet()});
-        CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null});
-        CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece});
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})});
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})});
     }
 });
 
