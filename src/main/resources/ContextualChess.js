@@ -44,6 +44,9 @@ function isNonEmpty(cell) {
     return getNonEmpty().contains(cell);
 }
 
+function isType(cell,type){
+    return getCellWithType(type).contains(cell);
+}
 
 //#endregion HELP FUNCTIONS
 
@@ -94,6 +97,13 @@ function getOppositeColor(cell) {
 
 }
 
+function getMyColor(cell) {
+
+    if (getCellWithColor(Color.Black).contains(cell))
+        return Color.Black;
+    return Color.White;
+
+}
 
 bp.registerBThread("block moving to the same place", function () {
     bp.sync({block: Move.SamePlaceMoveEventSet()});
@@ -194,12 +204,12 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
 function checkRight(cell, color) {
     for (var i = cell.i + 1; i < size; i++) {
         var currentCell = getCell(i, cell.j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.rook) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
-                if (currentCell.piece.type.equals(piece.Type.king) && i === cell.i + 1) {
+                if (isType(currentCell, Type.King) && i === cell.i + 1) {
                     return true;
                 }
             }
@@ -214,12 +224,12 @@ function checkRight(cell, color) {
 function checkLeft(cell, color) {
     for (var i = cell.i - 1; i >= 0; i--) {
         var currentCell = getCell(i, cell.j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.rook) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
-                if (currentCell.piece.type.equals(piece.Type.king) && i === cell.i - 1) {
+                if (isType(currentCell, Type.King) && i === cell.i - 1) {
                     return true;
                 }
             }
@@ -234,12 +244,12 @@ function checkLeft(cell, color) {
 function checkUp(cell, color) {
     for (var j = cell.j + 1; j < size; j++) {
         var currentCell = getCell(cell.i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.rook) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
-                if (currentCell.piece.type.equals(piece.Type.king) && j === cell.j + 1) {
+                if (isType(currentCell, Type.King) && j === cell.j + 1) {
                     return true;
                 }
             }
@@ -254,12 +264,12 @@ function checkUp(cell, color) {
 function checkDown(cell, color) {
     for (var j = cell.j - 1; j >= 0; j--) {
         var currentCell = getCell(cell.i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.rook) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
-                if (currentCell.piece.type.equals(piece.Type.king) && j === cell.j - 1) {
+                if (isType(currentCell, Type.King) && j === cell.j - 1) {
                     return true;
                 }
             }
@@ -272,18 +282,18 @@ function checkDown(cell, color) {
 }
 
 function checkUpRight(cell, color) {
-    for (var i = cell.i + 1, j = cell.j + 1; j < size, i < size; j++, i++) {
+    for (var i = cell.i + 1, j = cell.j + 1; j < size &&  i < size; j++, i++) {
         var currentCell = getCell(i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.Bishop) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
                 if (i === cell.i + 1 && j === cell.j + 1) {
-                    if (currentCell.piece.type.equals(piece.Type.king)) {
+                    if (isType(currentCell, Type.King)) {
                         return true;
                     }
-                    if (currentCell.piece.type.equals(piece.Type.pawn) && color.equals(piece.Color.Black)) {
+                    if (isType(currentCell, Type.Pawn) && color.equals(Color.Black)) {
                         return true;
                     }
                 }
@@ -297,18 +307,18 @@ function checkUpRight(cell, color) {
 }
 
 function checkUpLeft(cell, color) {
-    for (var i = cell.i - 1, j = cell.j + 1; j < size, i >= 0; j++, i--) {
+    for (var i = cell.i - 1, j = cell.j + 1; j < size && i >= 0; j++, i--) {
         var currentCell = getCell(i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.Bishop) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
                 if (i === cell.i - 1 && j === cell.j + 1) {
-                    if (currentCell.piece.type.equals(piece.Type.king)) {
+                    if (isType(currentCell, Type.King)) {
                         return true;
                     }
-                    if (currentCell.piece.type.equals(piece.Type.pawn) && color.equals(piece.Color.Black)) {
+                    if (isType(currentCell, Type.Pawn) && color.equals(Color.Black)) {
                         return true;
                     }
                 }
@@ -322,18 +332,18 @@ function checkUpLeft(cell, color) {
 }
 
 function checkDownRight(cell, color) {
-    for (var i = cell.i + 1, j = cell.j - 1; j >= 0, i < size; j--, i++) {
+    for (var i = cell.i + 1, j = cell.j - 1; j >= 0 && i < size; j--, i++) {
         var currentCell = getCell(i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.Bishop) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
                 if (i === cell.i + 1 && j === cell.j - 1) {
-                    if (currentCell.piece.type.equals(piece.Type.king)) {
+                    if (isType(currentCell, Type.King)) {
                         return true;
                     }
-                    if (currentCell.piece.type.equals(piece.Type.pawn) && color.equals(piece.Color.White)) {
+                    if (isType(currentCell, Type.Pawn) && color.equals(Color.Black)) {
                         return true;
                     }
                 }
@@ -347,18 +357,18 @@ function checkDownRight(cell, color) {
 }
 
 function checkDownLeft(cell, color) {
-    for (var i = cell.i - 1, j = cell.j - 1; j >= 0, i >= 0; j--, i--) {
+    for (var i = cell.i - 1, j = cell.j - 1; j >= 0 && i >= 0; j--, i--) {
         var currentCell = getCell(i, j);
-        if (currentCell.piece != null) { //there's someone in the cell
-            if (!currentCell.piece.color.equals(color)) { // the piece is enemy piece
-                if (currentCell.piece.type.equals(piece.Type.Bishop) || currentCell.piece.type.equals(piece.Type.queen)) {
+        if (isNonEmpty(currentCell)) { //there's someone in the cell
+            if (!isOtherColor(currentCell,getOppositeColor(cell))) { // the piece is enemy piece
+                if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
                 if (i === cell.i - 1 && j === cell.j - 1) {
-                    if (currentCell.piece.type.equals(piece.Type.king)) {
+                    if (isType(currentCell, Type.King)) {
                         return true;
                     }
-                    if (currentCell.piece.type.equals(piece.Type.pawn) && color.equals(piece.Color.White)) {
+                    if (isType(currentCell, Type.Pawn) && color.equals(Color.Black)) {
                         return true;
                     }
                 }
@@ -374,56 +384,56 @@ function checkDownLeft(cell, color) {
 function checkKnights(cell, color) {
     if (cell.i + 1 < size) {
         if (cell.j + 2 < size) {
-            var currentCell = getCell(i + 1, j + 2);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i + 1, cell.j + 2);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 2 >= 0) {
-            var currentCell = getCell(i + 1, j - 2);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i + 1, cell.j - 2);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
     }
     if (cell.i - 1 >= 0) {
         if (cell.j + 2 < size) {
-            var currentCell = getCell(i - 1, j + 2);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i - 1, cell.j + 2);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 2 >= 0) {
-            var currentCell = getCell(i - 1, j - 2);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i - 1, cell.j - 2);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
     }
     if (cell.i + 2 < size) {
         if (cell.j + 1 < size) {
-            var currentCell = getCell(i + 2, j + 1);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i + 2, cell.j + 1);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 1 >= 0) {
-            var currentCell = getCell(i + 2, j - 1);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i + 2, cell.j - 1);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
     }
     if (cell.i - 2 >= 0) {
         if (cell.j + 1 < size) {
-            var currentCell = getCell(i - 2, j + 1);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i - 2, cell.j + 1);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 1 >= 0) {
-            var currentCell = getCell(i - 2, j - 1);
-            if (currentCell.piece.type.equals(piece.Type.Knight) && !currentCell.piece.color.equals(color)) {
+            var currentCell = getCell(cell.i - 2, cell.j - 1);
+            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
                 return true;
             }
         }
@@ -432,57 +442,53 @@ function checkKnights(cell, color) {
 }
 
 function checkEmpty(cell) {
-    if (cell.piece !== null) {
-        return false;
-    }
-    return true;
+    return !isNonEmpty(cell);
 }
 //#region KingBehaviors
 function kingController(currentCell, currentColor) {
     return (!checkRight(currentCell, currentColor) && !checkLeft(currentCell, currentColor) && !checkUp(currentCell, currentColor) && !checkDown(currentCell, currentColor) && !checkUpLeft(currentCell, currentColor) && !checkUpRight(currentCell, currentColor) && !checkDownLeft(currentCell, currentColor) && !checkDownRight(currentCell, currentColor) && !checkKnights(currentCell, currentColor));
 }
 
-// CTX.subscribe("AskMoveForKing", "King", function (k) {
-//     bp.sync({ waitFor: bp.Event("Context Population Ended") });
-//     bp.sync({ waitFor: bp.Event("init_end") });
-//     while (true) {
-//         var kingCell = getCellWithPiece(k);
-//         var cells = [];
-//         var currentCell;
-//         var currentColor= kingCell.piece.color;
-//         if(!kingController(kingCell,currentColor)){
-//             //TODO: call chess event
-//         }
-//         currentCell=getCell(kingCell.i-1,kingCell.j-1);
-//         if(kingController(currentCell,currentColor) && checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i,kingCell.j-1 );
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i+1,kingCell.j-1);
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i-1,kingCell.j);
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i+1,kingCell.j);
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i-1,kingCell.j+1);
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i,kingCell.j+1);
-//         if(kingController(currentCell,currentColor))
-//             cells.push(currentCell);
-//         currentCell=getCell(kingCell.i+1,kingCell.j+1);
-//         if(kingController(currentCell,currentColor)&& checkEmpty(cell))
-//             cells.push(currentCell);
-//         var legalMoves = cells.map(function (c) {
-//             Move(r_c, c, r)
-//         });
-//         bp.sync({request: [legalMoves], waitFor: AnyMoveEventSet()});
-//     }
-// });
+CTX.subscribe("AskMoveForKing", "King", function (k) {
+    bp.sync({ waitFor: bp.Event("Context Population Ended") });
+    bp.sync({ waitFor: bp.Event("init_end") });
+    while (true) {
+        var kingCell = getCellWithPiece(k);
+        var cells = [];
+        var currentCell;
+        var currentColor= getMyColor(kingCell);
+        if(!kingController(kingCell,currentColor)){
+            //TODO: call chess event
+        }
+        currentCell=getCell(kingCell.i-1,kingCell.j-1);
+        if(kingController(currentCell,currentColor) && checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i,kingCell.j-1 );
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i+1,kingCell.j-1);
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i-1,kingCell.j);
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i+1,kingCell.j);
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i-1,kingCell.j+1);
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i,kingCell.j+1);
+        if(kingController(currentCell,currentColor))
+            cells.push(currentCell);
+        currentCell=getCell(kingCell.i+1,kingCell.j+1);
+        if(kingController(currentCell,currentColor)&& checkEmpty(cell))
+            cells.push(currentCell);
+        var legalMoves = cells.map(c => new Move(r_c, c, r));
+        bp.log.info("king legal moves:"+ cells);
+        // bp.sync({request: [legalMoves], waitFor: AnyMoveEventSet()});
+    }
+});
 //#endregion KingBehaviors
 
 
