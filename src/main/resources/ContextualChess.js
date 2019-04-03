@@ -224,9 +224,14 @@ CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
             cells.push(c);
         }
 
-
+        for (var start=0; start<cells.length;start++){
+            if(checkifCauseChess(rookCell,cells[start],rook)){
+                cells.splice(start,1);
+                start--;
+            }
+        }
         var legalMoves = cells.map(c => new Move(rookCell, c, rook));
-
+        bp.log.info("Rook legal moves are: "+ legalMoves);
          bp.sync({request: [legalMoves[0]], waitFor: Move.AnyMoveEventSet()});
         //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
     }
@@ -509,41 +514,81 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i - 1, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if( j-1>=0) {
             currentCell = getCell(kingCell.i, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if(i+1<size && j-1>=0) {
             currentCell = getCell(kingCell.i + 1, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if(i-1>=0 ) {
             currentCell = getCell(kingCell.i - 1, kingCell.j);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if(i+1<size) {
             currentCell = getCell(kingCell.i + 1, kingCell.j);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if(i-1>=0 && j+1<size) {
             currentCell = getCell(kingCell.i - 1, kingCell.j + 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if( j+1<size) {
             currentCell = getCell(kingCell.i, kingCell.j + 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         if(i+1<size && j+1<size) {
             currentCell = getCell(kingCell.i + 1, kingCell.j + 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
+            else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                if(!checkifCauseChess(kingCell,currentCell,king)){
+                    cells.push(currentCell);
+                }
+            }
         }
         var legalMoves = cells.map(c => new Move(kingCell, c, king));
         bp.sync({request: [legalMoves[0]],waitFor: Move.AnyMoveEventSet()});
@@ -554,9 +599,35 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
 function checkifCauseChess(source, target, piece){
     var ans=false;
     var kingCell;
+    var tempPiece={};
    if(isNonEmpty(target)){
+       if(isColor(target,Color.White)){
+           tempPiece.color=Color.White;
+       }
+       else{
+           tempPiece.color=Color.Black;
+       }
+       if(isType(target,Type.Rook)){
+           tempPiece.type=Type.Rook;
+       }
+       tempPiece.id=1;
+       var realPiece=getPiece(tempPiece.color+"_"+tempPiece.type+"_"+tempPiece.id);
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       if(myColor.equals(Color.White)) {
+           kingCell = getCellWithPiece(whiteKing);
+       }
+       else{
+           kingCell = getCellWithPiece(blackKing);
+       }
 
+       if(!kingController(kingCell,myColor)){
+           ans=true;
+       }
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":realPiece})});
    }
+
    else{
        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
