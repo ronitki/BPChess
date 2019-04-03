@@ -77,7 +77,7 @@ bp.registerBThread("UpdateMove", function () {
         var move= bp.sync({waitFor: Move.AnyMoveEventSet()});
         bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})});
         bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})});
-        //ronit
+        //ronit1
     }
 });
 
