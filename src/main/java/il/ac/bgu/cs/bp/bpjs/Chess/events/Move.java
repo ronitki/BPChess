@@ -38,6 +38,11 @@ public class Move extends BEvent {
         return source.equals(other.source) && target.equals(other.target) && piece.equals(other.piece);
     }
 
+    @Override
+    public String toString() {
+        return "Move(" +source.i+","+source.j+")->("+target.i+","+target.j+"),"+ piece ;
+    }
+
     public static class AnyMoveEventSet implements EventSet {
         @Override
         public boolean contains(BEvent bEvent) {

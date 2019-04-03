@@ -28,6 +28,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private boolean wasInitEnded=false;
     private ContextService contextService;
     private BProgram bprog;
+    private BlackEventsListener blackEventsListener;
 
     private static final String ENGINENAME = "BPChess";
     private static final String AUTHOR = "Ronit and Banuel";
@@ -108,7 +109,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             e.printStackTrace();
         }
         contextService.addListener(this);
-        contextService.addListener(new BlackEventsListener(this));
+        blackEventsListener=new BlackEventsListener(this);
+        contextService.addListener(blackEventsListener);
         contextService.run();
 
         //restart the main
@@ -133,18 +135,23 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         }
 
         if (input.contains("moves")) {
-            if(!wasInitEnded)
-            bprog.enqueueExternalEvent(new BEvent("color","black"));
+            if(!wasInitEnded) {
+                bprog.enqueueExternalEvent(new BEvent("color", "black"));
+                blackEventsListener.setColor(Color.Black);
+            }
             input = input.substring(input.length() - 5, input.length() - 1);
             if (input.length() > 0) {
                 bprog.enqueueExternalEvent(new BEvent("HisMove"));
                 bprog.enqueueExternalEvent(new BEvent(input));
+
 //                bprog.enqueueExternalEvent(StringToMove(input));
             }
         }
         else{
-            if(!wasInitEnded)
-            bprog.enqueueExternalEvent(new BEvent("color","white"));
+            if(!wasInitEnded) {
+                bprog.enqueueExternalEvent(new BEvent("color", "white"));
+                blackEventsListener.setColor(Color.White);
+            }
         }
         if(!wasInitEnded) {
             bprog.enqueueExternalEvent(new BEvent("init_end"));

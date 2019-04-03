@@ -94,7 +94,6 @@ bp.registerBThread("GetHisMove", function () {
 function getRealPiece(input){
     var i=input.charAt(0)-97;
     var j=input.charAt(1)-49;
-    bp.log.info(i+"_"+j);
     var cell=getCell(i,j);
     var piece={};
     if(getCellWithType(Type.King).contains(cell)){
@@ -109,18 +108,13 @@ function getRealPiece(input){
     else{
         piece.color="Black";
     }
-    // if(getPieceId(1).contains(cell)){
         piece.id=1;
-    // }
-    // else{
-    //     piece.id=2;
-    // }
     return getPiece(piece.color+"_"+piece.type+"_"+piece.id);
 }
 
 bp.registerBThread("GetMyColor", function () {
     myColor = bp.sync({waitFor: [bp.Event("color", "black"), bp.Event("color", "white")]}).data;
-    if (myColor === "black") {
+    if (myColor.localeCompare("black")===0) {
         myColor = Color.Black;
         otherColor = Color.White;
     }
