@@ -37,6 +37,13 @@ function createPieces() {
                 CTX_instance.registerParameterizedContextQuery("CellWithType", "CellWithType("+ type +")", {
                     "type" : type
                 });
+                CTX_instance.registerParameterizedContextQuery("SpecificPiece", "SpecificPiece("+piece.toString()+")", {
+                    "piece": piece
+                });
+                CTX_instance.registerParameterizedContextQuery("PieceOfId", "PieceOfId("+ n+1 +")", {
+                    "id": (n+1).toString()
+                });
+
                 pieces.push(piece);
             }
         }

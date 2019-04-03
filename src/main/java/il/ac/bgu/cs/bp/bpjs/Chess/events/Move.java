@@ -92,5 +92,11 @@ public class Move extends BEvent {
             return bEvent instanceof Move && ((Move)bEvent).target.piece!=null;
         }
     }
+    public static class AnyEventSet implements EventSet {
 
+        @Override
+        public boolean contains(BEvent bEvent) {
+            return true;
+        }
+    }
 }

@@ -13,6 +13,8 @@ import javax.persistence.*;
 @NamedQueries(value = {
         @NamedQuery(name = "Piece", query = "SELECT p FROM Piece p"),
         @NamedQuery(name = "PieceOfType", query = "SELECT p FROM Piece p WHERE p.type =:type"),
+        @NamedQuery(name = "PieceOfId", query = "SELECT p FROM Piece p WHERE p.id =:id"),
+        @NamedQuery(name = "SpecificPiece", query = "SELECT p FROM Piece p WHERE p =:piece"),
         @NamedQuery(name = "DeletePiece", query = "DELETE FROM Piece p Where p=:p"),
 })
 public class Piece extends BasicEntity {

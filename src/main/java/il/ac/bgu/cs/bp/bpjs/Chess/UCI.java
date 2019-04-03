@@ -10,10 +10,7 @@ import il.ac.bgu.cs.bp.bpjs.execution.listeners.PrintBProgramRunnerListener;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -136,13 +133,17 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         }
 
         if (input.contains("moves")) {
+            if(!wasInitEnded)
             bprog.enqueueExternalEvent(new BEvent("color","black"));
             input = input.substring(input.length() - 5, input.length() - 1);
             if (input.length() > 0) {
-                bprog.enqueueExternalEvent(StringToMove(input));
+                bprog.enqueueExternalEvent(new BEvent("HisMove"));
+                bprog.enqueueExternalEvent(new BEvent(input));
+//                bprog.enqueueExternalEvent(StringToMove(input));
             }
         }
         else{
+            if(!wasInitEnded)
             bprog.enqueueExternalEvent(new BEvent("color","white"));
         }
         if(!wasInitEnded) {
