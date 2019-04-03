@@ -6,6 +6,8 @@ importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
 
 var myColor;
 var otherColor;
+var blackKing;
+var whiteKing;
 //#region HELP FUNCTIONS
 function getCell(i, j) {
     return CTX.getContextsOfType("Cell(" + i + "," + j + ")").get(0);
@@ -90,7 +92,6 @@ function getMyColor(cell) {
 }
 //#endregion HELP FUNCTIONS
 
-
 //#region GameRules
 bp.registerBThread("EnforceTurns", function () {
     while (true) {
@@ -103,8 +104,8 @@ bp.registerBThread("EnforceTurns", function () {
 bp.registerBThread("UpdateMove", function () {
     while (true) {
         var move= bp.sync({waitFor: Move.AnyMoveEventSet()});
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})});
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})});
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})},100);
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})},100);
         //ronit1
     }
 });
@@ -114,9 +115,9 @@ bp.registerBThread("GetHisMove", function () {
          bp.sync({waitFor: [bp.Event("HisMove")]});
         var input= bp.sync({waitFor: Move.AnyEventSet()}).name;
         var piece=getRealPiece(input);
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})});
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})});
-        bp.sync({request: new Move(new Cell(input.charAt(0)-97,input.charAt(1)-49),new Cell(input.charAt(2)-97,input.charAt(3)-49),piece)});
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})},100);
+        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})},100);
+        bp.sync({request: new Move(new Cell(input.charAt(0)-97,input.charAt(1)-49),new Cell(input.charAt(2)-97,input.charAt(3)-49),piece)},100);
     }
 });
 
@@ -158,7 +159,6 @@ CTX.subscribe("Kill piece", "piece", function (p) {
     bp.sync({block: Move.PieceMoveEventSet(p)});
 });
 //TODO add bt that forbids my moves that will cause chess to me
-//TODO add bt that wait for other moves and detects chess (and declare chess with event
 //TODO for each piece - add bt that wait for my turn and then blocks all moves that will cause check
 
 //#endregion GameRules
@@ -227,7 +227,7 @@ CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
 
         var legalMoves = cells.map(c => new Move(rookCell, c, rook));
 
-         bp.sync({request: [legalMoves[0]]});
+         bp.sync({request: [legalMoves[0]], waitFor: Move.AnyMoveEventSet()});
         //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
     }
 });
@@ -484,6 +484,12 @@ function kingController(currentCell, currentColor) {
 CTX.subscribe("AskMoveForKing", "King", function (king) {
     bp.sync({ waitFor: bp.Event("Context Population Ended") });
     bp.sync({ waitFor: bp.Event("init_end") });
+    if(king.color.equals(Color.Black)){
+        blackKing=king;
+    }
+    else{
+        whiteKing=king;
+    }
     while (true) {
         var kingCell = getCellWithPiece(king);
         if(kingCell===null)
@@ -495,6 +501,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         var currentColor= getMyColor(kingCell);
         if(!kingController(kingCell,currentColor)){
             //TODO: call chess event
+            bp.sync({ request: bp.Event("Chess Event") });
         }
         var i=kingCell.i;
         var j=kingCell.j;
@@ -544,5 +551,27 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
 });
 //#endregion KingBehaviors
 
+function checkifCauseChess(source, target, piece){
+    var ans=false;
+    var kingCell;
+   if(isNonEmpty(target)){
 
+   }
+   else{
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       if(myColor.equals(Color.White)) {
+           kingCell = getCellWithPiece(whiteKing);
+       }
+       else{
+           kingCell = getCellWithPiece(blackKing);
+       }
 
+       if(!kingController(kingCell,myColor)){
+            ans=true;
+       }
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":null})});
+   }
+   return ans;
+}

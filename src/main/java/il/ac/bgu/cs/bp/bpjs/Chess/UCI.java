@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 
-
 import static il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator.StringToMove;
 
 public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
@@ -24,8 +23,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private PrintStream out;
     private Scanner scanner;
     private PrintWriter logger;
-    private boolean wasInitialized=false;
-    private boolean wasInitEnded=false;
+    private boolean wasInitialized = false;
+    private boolean wasInitEnded = false;
     private ContextService contextService;
     private BProgram bprog;
     private BlackEventsListener blackEventsListener;
@@ -109,13 +108,13 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             e.printStackTrace();
         }
         contextService.addListener(this);
-        blackEventsListener=new BlackEventsListener(this);
+        blackEventsListener = new BlackEventsListener(this);
         contextService.addListener(blackEventsListener);
         contextService.run();
 
         //restart the main
-        wasInitialized=false;
-        wasInitEnded=false;
+        wasInitialized = false;
+        wasInitEnded = false;
 
     }
 
@@ -126,16 +125,16 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             input = input.substring(9);
         }
         // Different start
-        else if (input.contains("fen")&&!wasInitialized) {
-            wasInitialized=true;
+        else if (input.contains("fen") && !wasInitialized) {
+            wasInitialized = true;
             input = input.substring(4);
             String fenBoard = input.substring(0, input.indexOf(" w"));
             splitFen(fenBoard);
-           // bprog.enqueueExternalEvent(new BEvent("init_end"));
+            // bprog.enqueueExternalEvent(new BEvent("init_end"));
         }
 
         if (input.contains("moves")) {
-            if(!wasInitEnded) {
+            if (!wasInitEnded) {
                 bprog.enqueueExternalEvent(new BEvent("color", "black"));
                 blackEventsListener.setColor(Color.Black);
             }
@@ -144,24 +143,29 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                 bprog.enqueueExternalEvent(new BEvent("HisMove"));
                 bprog.enqueueExternalEvent(new BEvent(input));
 
-//                bprog.enqueueExternalEvent(StringToMove(input));
             }
-        }
-        else{
-            if(!wasInitEnded) {
+        } else {
+            if (!wasInitEnded) {
                 bprog.enqueueExternalEvent(new BEvent("color", "white"));
                 blackEventsListener.setColor(Color.White);
             }
         }
-        if(!wasInitEnded) {
+        if (!wasInitEnded) {
             bprog.enqueueExternalEvent(new BEvent("init_end"));
-            wasInitEnded=true;
+            wasInitEnded = true;
         }
     }
 
     private void splitFen(String fen) {
         String[] lines = fen.split("/");
         int bRooks = 1;
+        int wRooks = 1;
+        int bKnights = 1;
+        int wKnights = 1;
+        int bBishops = 1;
+        int wBishops = 1;
+        int bPawns = 1;
+        int wPawns = 1;
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
             for (int j = 0; j < line.length(); j++) {
@@ -174,31 +178,88 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
                     y = y - i;
                     p = new Piece(Color.Black, Type.Rook, bRooks);
                     bRooks++;
-                    insert(p,x,y);
+                    insert(p, x, y);
+                } else if (line.charAt(j) == 'R') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.White, Type.Rook, wRooks);
+                    wRooks++;
+                    insert(p, x, y);
+                } else if (line.charAt(j) == 'n') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.Black, Type.Knight, bKnights);
+                    bKnights++;
+                    insert(p, x, y);
+                } else if (line.charAt(j) == 'N') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.White, Type.Knight, wKnights);
+                    wKnights++;
+                    insert(p, x, y);
+                }else if (line.charAt(j) == 'b') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.Black, Type.Bishop, bBishops);
+                    bBishops++;
+                    insert(p, x, y);
+                }
+                else if (line.charAt(j) == 'B') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.White, Type.Bishop, wBishops);
+                    wBishops++;
+                    insert(p, x, y);
+                }
+                else if (line.charAt(j) == 'p') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.Black, Type.Pawn, bPawns);
+                    bPawns++;
+                    insert(p, x, y);
+                }
+                else if (line.charAt(j) == 'P') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.White, Type.Pawn, wPawns);
+                    wPawns++;
+                    insert(p, x, y);
+                }
+                else if (line.charAt(j) == 'q') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.Black, Type.Queen, 1);
+                    insert(p, x, y);
+                } else if (line.charAt(j) == 'Q') {
+                    x = getRow(line, j);
+                    y = y - i;
+                    p = new Piece(Color.White, Type.Queen, 1);
+                    insert(p, x, y);
                 } else if (line.charAt(j) == 'k') {
                     x = getRow(line, j);
                     y = y - i;
                     p = new Piece(Color.Black, Type.King, 1);
-                    insert(p,x,y);
+                    insert(p, x, y);
                 } else if (line.charAt(j) == 'K') {
                     x = getRow(line, j);
                     y = y - i;
                     p = new Piece(Color.White, Type.King, 1);
-                    insert(p,x,y);
-                } else if (!Character.isDigit(line.charAt(j))){
-                    throw  new UnsupportedOperationException("Need to support other types of pieces");
+                    insert(p, x, y);
+                } else if (!Character.isDigit(line.charAt(j))) {
+                    throw new UnsupportedOperationException("Need to support other types of pieces");
                 }
 
 
             }
         }
     }
-    private void insert (Piece p, int x, int y) {
+
+    private void insert(Piece p, int x, int y) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("piece", p);
-        parameters.put("cell", new Cell(x, y,p));
+        parameters.put("cell", new Cell(x, y, p));
         bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
-       // bprog.enqueueExternalEvent(new ContextService.AnyUpdateContextDBEvent("Cell"));
+        // bprog.enqueueExternalEvent(new ContextService.AnyUpdateContextDBEvent("Cell"));
     }
 
     private int getRow(String line, int index) {
