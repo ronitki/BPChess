@@ -24,14 +24,6 @@ function getPiece(p) {
         return null;
     }
 }
-
-function getPieceId(id) {
-    try {
-        return CTX.getContextsOfType("PieceOfId(" + id + ")");
-    } catch (e) {
-        return null;
-    }
-}
 function getCellWithColor(c) {
     try {
         return CTX.getContextsOfType("CellWithColor(" + c + ")");
@@ -59,7 +51,43 @@ function isNonEmpty(cell) {
 function isType(cell,type){
     return getCellWithType(type).contains(cell);
 }
+function isColor(cell, color) {
+    return getCellWithColor(color).contains(cell);
+}
+function getRealPiece(input){
+    var i=input.charAt(0)-97;
+    var j=input.charAt(1)-49;
+    var cell=getCell(i,j);
+    var piece={};
+    if(getCellWithType(Type.King).contains(cell)){
+        piece.type="King";
+    }
+    else{
+        piece.type="Rook";
+    }
+    if(getCellWithColor(Color.White).contains(cell)){
+        piece.color="White";
+    }
+    else{
+        piece.color="Black";
+    }
+    piece.id=1;
+    return getPiece(piece.color+"_"+piece.type+"_"+piece.id);
+}
+function getOppositeColor(cell) {
 
+    if (getCellWithColor(Color.Black).contains(cell))
+        return Color.White;
+    return Color.Black;
+
+}
+function getMyColor(cell) {
+
+    if (getCellWithColor(Color.Black).contains(cell))
+        return Color.Black;
+    return Color.White;
+
+}
 //#endregion HELP FUNCTIONS
 
 
@@ -92,27 +120,6 @@ bp.registerBThread("GetHisMove", function () {
     }
 });
 
-function getRealPiece(input){
-    var i=input.charAt(0)-97;
-    var j=input.charAt(1)-49;
-    var cell=getCell(i,j);
-    var piece={};
-    if(getCellWithType(Type.King).contains(cell)){
-        piece.type="King";
-    }
-    else{
-        piece.type="Rook";
-    }
-    if(getCellWithColor(Color.White).contains(cell)){
-        piece.color="White";
-    }
-    else{
-        piece.color="Black";
-    }
-        piece.id=1;
-    return getPiece(piece.color+"_"+piece.type+"_"+piece.id);
-}
-
 bp.registerBThread("GetMyColor", function () {
     myColor = bp.sync({waitFor: [bp.Event("color", "black"), bp.Event("color", "white")]}).data;
     if (myColor.localeCompare("black")===0) {
@@ -130,39 +137,14 @@ bp.registerBThread("GetMyColor", function () {
 
     }
 });
-function isOtherColor(cell, color) {
-    return getCellWithColor(color).contains(cell);
-}
-
-function getOppositeColor(cell) {
-
-    if (getCellWithColor(Color.Black).contains(cell))
-        return Color.White;
-    return Color.Black;
-
-}
-function getMyColor(cell) {
-
-    if (getCellWithColor(Color.Black).contains(cell))
-        return Color.Black;
-    return Color.White;
-
-}
 
 bp.registerBThread("block moving to the same place", function () {
     bp.sync({block: Move.SamePlaceMoveEventSet()});
 });
 
-
-CTX.subscribe("Kill piece", "piece", function (p) {
-    bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
-    bp.sync({block: Move.PieceMoveEventSet(p)});
-});
-
 bp.registerBThread("block out of board moves", function () {
     bp.sync({block: Move.OutOfBoardMoveEventSet()});
 });
-
 
 bp.registerBThread("delete piece upon eating", function () {
     while (true) {
@@ -171,6 +153,10 @@ bp.registerBThread("delete piece upon eating", function () {
     }
 });
 
+CTX.subscribe("Kill piece", "piece", function (p) {
+    bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
+    bp.sync({block: Move.PieceMoveEventSet(p)});
+});
 //TODO add bt that forbids my moves that will cause chess to me
 //TODO add bt that wait for other moves and detects chess (and declare chess with event
 //TODO for each piece - add bt that wait for my turn and then blocks all moves that will cause check
@@ -178,23 +164,23 @@ bp.registerBThread("delete piece upon eating", function () {
 //#endregion GameRules
 
 //#region RookBehaviors
-CTX.subscribe("AskMoveForRook", "Rook", function (r) {
+CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
     bp.sync({waitFor: bp.Event("Context Population Ended")});
     bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
-        var r_c = getCellWithPiece(r);
-        if (r_c == null) { // If the piece is not on board
+        var rookCell = getCellWithPiece(rook);
+        if (rookCell == null) { // If the piece is not on board
             break;
         }
-        if(isOtherColor(r_c,otherColor)){
+        if(isColor(rookCell,otherColor)){
             break;
         }
         var cells = [];
         //right
-        for (var i = r_c.i + 1; i < size; i++) {
-            var c = getCell(i, r_c.j);
+        for (var i = rookCell.i + 1; i < size; i++) {
+            var c = getCell(i, rookCell.j);
             if (isNonEmpty(c)) {
-                if (isOtherColor(c, getOppositeColor(r_c))) {
+                if (isColor(c, getOppositeColor(rookCell))) {
                     cells.push(c);
                 }
                 break;
@@ -203,10 +189,10 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
 
         }
         //left
-        for (var i = r_c.i - 1; i >= 0; i--) {
-            var c = getCell(i, r_c.j);
+        for (var i = rookCell.i - 1; i >= 0; i--) {
+            var c = getCell(i, rookCell.j);
             if (isNonEmpty(c)) {
-                if (isOtherColor(c, getOppositeColor(r_c))) {
+                if (isColor(c, getOppositeColor(rookCell))) {
                     cells.push(c);
                 }
                 break;
@@ -215,11 +201,11 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
 
         }
         //up
-        for (var j = r_c.j + 1; j < size; j++) {
-            var c = getCell(r_c.i, j);
+        for (var j = rookCell.j + 1; j < size; j++) {
+            var c = getCell(rookCell.i, j);
 
             if (isNonEmpty(c)) {
-                if (isOtherColor(c, getOppositeColor(r_c))) {
+                if (isColor(c, getOppositeColor(rookCell))) {
                     cells.push(c);
                 }
                 break;
@@ -227,10 +213,10 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
             cells.push(c);
         }
         //down
-        for (var j = r_c.j - 1; j >= 0; j--) {
-            var c = getCell(r_c.i, j);
+        for (var j = rookCell.j - 1; j >= 0; j--) {
+            var c = getCell(rookCell.i, j);
             if (isNonEmpty(c)) {
-                if (isOtherColor(c, getOppositeColor(r_c))) {
+                if (isColor(c, getOppositeColor(rookCell))) {
                     cells.push(c);
                 }
                 break;
@@ -239,7 +225,7 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
         }
 
 
-        var legalMoves = cells.map(c => new Move(r_c, c, r));
+        var legalMoves = cells.map(c => new Move(rookCell, c, rook));
 
          bp.sync({request: [legalMoves[0]]});
         //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
@@ -251,7 +237,7 @@ function checkRight(cell, color) {
     for (var i = cell.i + 1; i < size; i++) {
         var currentCell = getCell(i, cell.j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -271,7 +257,7 @@ function checkLeft(cell, color) {
     for (var i = cell.i - 1; i >= 0; i--) {
         var currentCell = getCell(i, cell.j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -291,7 +277,7 @@ function checkUp(cell, color) {
     for (var j = cell.j + 1; j < size; j++) {
         var currentCell = getCell(cell.i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -311,7 +297,7 @@ function checkDown(cell, color) {
     for (var j = cell.j - 1; j >= 0; j--) {
         var currentCell = getCell(cell.i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -331,7 +317,7 @@ function checkUpRight(cell, color) {
     for (var i = cell.i + 1, j = cell.j + 1; j < size &&  i < size; j++, i++) {
         var currentCell = getCell(i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -356,7 +342,7 @@ function checkUpLeft(cell, color) {
     for (var i = cell.i - 1, j = cell.j + 1; j < size && i >= 0; j++, i--) {
         var currentCell = getCell(i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -381,7 +367,7 @@ function checkDownRight(cell, color) {
     for (var i = cell.i + 1, j = cell.j - 1; j >= 0 && i < size; j--, i++) {
         var currentCell = getCell(i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -406,7 +392,7 @@ function checkDownLeft(cell, color) {
     for (var i = cell.i - 1, j = cell.j - 1; j >= 0 && i >= 0; j--, i--) {
         var currentCell = getCell(i, j);
         if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isOtherColor(currentCell,color)) { // the piece is enemy piece
+            if (!isColor(currentCell,color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -431,13 +417,13 @@ function checkKnights(cell, color) {
     if (cell.i + 1 < size) {
         if (cell.j + 2 < size) {
             var currentCell = getCell(cell.i + 1, cell.j + 2);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 2 >= 0) {
             var currentCell = getCell(cell.i + 1, cell.j - 2);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
@@ -445,13 +431,13 @@ function checkKnights(cell, color) {
     if (cell.i - 1 >= 0) {
         if (cell.j + 2 < size) {
             var currentCell = getCell(cell.i - 1, cell.j + 2);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 2 >= 0) {
             var currentCell = getCell(cell.i - 1, cell.j - 2);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
@@ -459,13 +445,13 @@ function checkKnights(cell, color) {
     if (cell.i + 2 < size) {
         if (cell.j + 1 < size) {
             var currentCell = getCell(cell.i + 2, cell.j + 1);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 1 >= 0) {
             var currentCell = getCell(cell.i + 2, cell.j - 1);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
@@ -473,13 +459,13 @@ function checkKnights(cell, color) {
     if (cell.i - 2 >= 0) {
         if (cell.j + 1 < size) {
             var currentCell = getCell(cell.i - 2, cell.j + 1);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
         if (cell.j - 1 >= 0) {
             var currentCell = getCell(cell.i - 2, cell.j - 1);
-            if (isType(currentCell, Type.Pawn) && !isOtherColor(currentCell,color)) {
+            if (isType(currentCell, Type.Pawn) && !isColor(currentCell,color)) {
                 return true;
             }
         }
@@ -495,14 +481,14 @@ function kingController(currentCell, currentColor) {
     return (!checkRight(currentCell, currentColor) && !checkLeft(currentCell, currentColor) && !checkUp(currentCell, currentColor) && !checkDown(currentCell, currentColor) && !checkUpLeft(currentCell, currentColor) && !checkUpRight(currentCell, currentColor) && !checkDownLeft(currentCell, currentColor) && !checkDownRight(currentCell, currentColor) && !checkKnights(currentCell, currentColor));
 }
 
-CTX.subscribe("AskMoveForKing", "King", function (k) {
+CTX.subscribe("AskMoveForKing", "King", function (king) {
     bp.sync({ waitFor: bp.Event("Context Population Ended") });
     bp.sync({ waitFor: bp.Event("init_end") });
     while (true) {
-        var kingCell = getCellWithPiece(k);
+        var kingCell = getCellWithPiece(king);
         if(kingCell===null)
             break;
-        if(isOtherColor(kingCell,otherColor))
+        if(isColor(kingCell,otherColor))
             break;
         var cells = [];
         var currentCell;
@@ -552,7 +538,7 @@ CTX.subscribe("AskMoveForKing", "King", function (k) {
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
         }
-        var legalMoves = cells.map(c => new Move(kingCell, c, k));
+        var legalMoves = cells.map(c => new Move(kingCell, c, king));
         bp.sync({request: [legalMoves[0]],waitFor: Move.AnyMoveEventSet()});
     }
 });
