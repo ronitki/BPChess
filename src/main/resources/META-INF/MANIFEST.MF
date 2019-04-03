@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Class-Path: javax.persistence-api-2.2.jar jaxb-impl-2.2.11.jar failure
+ access-1.0.1.jar byte-buddy-1.8.17.jar rhino-1.7.9.jar annotations-17
+ .0.0.jar BPjs-0.9.8.jar javax.activation-api-1.2.0.jar javassist-3.23
+ .1-GA.jar checker-qual-2.5.2.jar jaxb-api-2.2.11.jar BPjs-Context-Cor
+ e-28eefc3.jar error_prone_annotations-2.2.0.jar guava-27.0.1-jre.jar 
+ activation-1.1.1.jar jsr305-3.0.2.jar classmate-1.3.4.jar jandex-2.0.
+ 5.Final.jar dom4j-2.1.1.jar listenablefuture-9999.0-empty-to-avoid-co
+ nflict-with-guava.jar sqlite-jdbc-3.25.2.jar hibernate-commons-annota
+ tions-5.0.4.Final.jar animal-sniffer-annotations-1.17.jar antlr-2.7.7
+ .jar j2objc-annotations-1.1.jar jboss-logging-3.3.2.Final.jar jboss-t
+ ransaction-api_1.2_spec-1.1.1.Final.jar hibernate-core-5.3.7.Final.ja
+ r sqlite-dialect-0.1.0.jar jaxb-core-2.2.11.jar
+Main-Class: il.ac.bgu.cs.bp.bpjs.Chess.ChessGameMain
+
