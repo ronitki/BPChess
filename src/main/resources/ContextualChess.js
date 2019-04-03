@@ -77,6 +77,7 @@ bp.registerBThread("UpdateMove", function () {
         var move= bp.sync({waitFor: Move.AnyMoveEventSet()});
         bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})});
         bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})});
+        //ronit
     }
 });
 
@@ -182,7 +183,6 @@ CTX.subscribe("AskMoveForRook", "Rook", function (r) {
     bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         var r_c = getCellWithPiece(r);
-
         if (r_c == null) { // If the piece is not on board
             break;
         }
@@ -554,7 +554,6 @@ CTX.subscribe("AskMoveForKing", "King", function (k) {
         }
         var legalMoves = cells.map(c => new Move(kingCell, c, k));
         bp.sync({request: [legalMoves[0]],waitFor: Move.AnyMoveEventSet()});
-        // bp.sync({request: [legalMoves], waitFor: AnyMoveEventSet()});
     }
 });
 //#endregion KingBehaviors
