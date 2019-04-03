@@ -116,9 +116,9 @@ bp.registerBThread("GetHisMove", function () {
          bp.sync({waitFor: [bp.Event("HisMove")]});
         var input= bp.sync({waitFor: Move.AnyEventSet()}).name;
         var piece=getRealPiece(input);
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})},100);
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})},100);
-        bp.sync({request: bp.Event("Database Updated") });
+        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})},100);
+        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})},100);
+        // bp.sync({request: bp.Event("Database Updated") });
         bp.sync({request: new Move(new Cell(input.charAt(0)-97,input.charAt(1)-49),new Cell(input.charAt(2)-97,input.charAt(3)-49),piece)},100);
 
 
@@ -235,10 +235,9 @@ CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
             }
         }
         var legalMoves = cells.map(c => new Move(rookCell, c, rook));
-        bp.log.info("Rook legal moves are: "+ legalMoves);
-        bp.sync({request: [legalMoves[0]]});
-        bp.sync({waitFor: bp.Event("Database Updated")});
-        //TODO interrupt contextEnded "interrupt: CTX.ContextEnded("Piece", p)});"
+        bp.sync({request: [legalMoves[0]],waitFor: bp.Event("Database Updated")});
+        // bp.sync({request: [legalMoves[0]]});
+        // bp.sync({waitFor: bp.Event("Database Updated")});
     }
 });
 //#endregion RookBehaviors
@@ -501,7 +500,6 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         whiteKing=king;
     }
     while (true) {
-        bp.log.info("I am here with: "+ king);
         var kingCell = getCellWithPiece(king);
         if(kingCell===null)
             break;
@@ -558,8 +556,10 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         }
         if(i+1<size) {
             currentCell = getCell(kingCell.i + 1, kingCell.j);
-            if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
+            if (kingController(currentCell, currentColor) && checkEmpty(currentCell)) {
+                bp.log.info("I am here_1");
                 cells.push(currentCell);
+            }
             else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
                 if(!checkifCauseChess(kingCell,currentCell,king)){
                     cells.push(currentCell);
@@ -591,66 +591,69 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
             else if (kingController(currentCell, currentColor) &&!checkEmpty(currentCell)){
+                bp.log.info("I am here");
                 if(!checkifCauseChess(kingCell,currentCell,king)){
                     cells.push(currentCell);
                 }
             }
         }
         var legalMoves = cells.map(c => new Move(kingCell, c, king));
-        bp.log.info("King legal moves: "+legalMoves);
-        bp.sync({request: [legalMoves[0]]});
-        bp.sync({waitFor: bp.Event("Database Updated")});
+        bp.log.info("King moves: "+ legalMoves );
+        bp.sync({request: [legalMoves[0]],waitFor: bp.Event("Database Updated")});
+        // bp.sync({waitFor: bp.Event("Database Updated")});
     }
 });
 //#endregion KingBehaviors
 
 function checkifCauseChess(source, target, piece){
+    bp.log.info("Enter func");
     var ans=false;
-   //  var kingCell;
-   //  var tempPiece={};
-   // if(isNonEmpty(target)){
-   //     if(isColor(target,Color.White)){
-   //         tempPiece.color=Color.White;
-   //     }
-   //     else{
-   //         tempPiece.color=Color.Black;
-   //     }
-   //     if(isType(target,Type.Rook)){
-   //         tempPiece.type=Type.Rook;
-   //     }
-   //     tempPiece.id=1;
-   //     var realPiece=getPiece(tempPiece.color+"_"+tempPiece.type+"_"+tempPiece.id);
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
-   //     if(myColor.equals(Color.White)) {
-   //         kingCell = getCellWithPiece(whiteKing);
-   //     }
-   //     else{
-   //         kingCell = getCellWithPiece(blackKing);
-   //     }
-   //
-   //     if(!kingController(kingCell,myColor)){
-   //         ans=true;
-   //     }
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":realPiece})});
-   // }
-   //
-   // else{
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
-   //     if(myColor.equals(Color.White)) {
-   //         kingCell = getCellWithPiece(whiteKing);
-   //     }
-   //     else{
-   //         kingCell = getCellWithPiece(blackKing);
-   //     }
-   //
-   //     if(!kingController(kingCell,myColor)){
-   //          ans=true;
-   //     }
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
-   //     bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":null})});
-   // }
+    var kingCell;
+    var tempPiece={};
+   if(isNonEmpty(target)){
+       if(isColor(target,Color.White)){
+           tempPiece.color=Color.White;
+       }
+       else{
+           tempPiece.color=Color.Black;
+       }
+       if(isType(target,Type.Rook)){
+           tempPiece.type=Type.Rook;
+       }
+       tempPiece.id=1;
+       var realPiece=getPiece(tempPiece.color+"_"+tempPiece.type+"_"+tempPiece.id);
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       if(myColor.equals(Color.White)) {
+           kingCell = getCellWithPiece(whiteKing);
+       }
+       else{
+           kingCell = getCellWithPiece(blackKing);
+       }
+
+       if(!kingController(kingCell,myColor)){
+           ans=true;
+       }
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":realPiece})});
+   }
+
+   else{
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       if(myColor.equals(Color.White)) {
+           kingCell = getCellWithPiece(whiteKing);
+       }
+       else{
+           kingCell = getCellWithPiece(blackKing);
+       }
+
+       if(!kingController(kingCell,myColor)){
+            ans=true;
+       }
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
+       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":null})});
+   }
+  bp.log.info("Out Fun");
    return ans;
 }
