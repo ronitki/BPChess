@@ -14,9 +14,7 @@ import javax.persistence.*;
         @NamedQuery(name = "UpdateCell", query = "Update Cell c set c.piece=:piece where c=:cell"),
         @NamedQuery(name = "CellWithColor", query = "SELECT c FROM Cell c WHERE c.piece.color=:color"),
         @NamedQuery(name = "CellWithType", query = "SELECT c FROM Cell c WHERE c.piece.type=:type"),
-        @NamedQuery(name = "DeleteCell", query = "DELETE FROM Cell c Where c=:cell"),
-
-
+//        @NamedQuery(name = "DeleteCell", query = "DELETE FROM Cell c Where c=:cell"),
 })
 
 public class Cell extends BasicEntity {

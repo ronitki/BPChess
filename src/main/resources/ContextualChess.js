@@ -101,11 +101,13 @@ bp.registerBThread("EnforceTurns", function () {
     }
 });
 
-bp.registerBThread("UpdateMove", function () {
+bp.registerBThread("UpdateBoardOnMove", function () {
     while (true) {
         var move= bp.sync({waitFor: Move.AnyMoveEventSet()});
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null})},100);
-        bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece})},100);
+        bp.sync({request:
+                CTX.Transaction(
+                    CTX.UpdateEvent("UpdateCell",{"cell":move.source,"piece":null}),
+                    CTX.UpdateEvent("UpdateCell",{"cell":move.target,"piece":move.piece}))});
         bp.sync({ request: bp.Event("Database Updated") });
         //ronit1
     }
@@ -116,10 +118,10 @@ bp.registerBThread("GetHisMove", function () {
          bp.sync({waitFor: [bp.Event("HisMove")]});
         var input= bp.sync({waitFor: Move.AnyEventSet()}).name;
         var piece=getRealPiece(input);
-        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})},100);
-        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})},100);
+        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(0)-97,input.charAt(1)-49),"piece":null})});
+        // bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":new Cell(input.charAt(2)-97,input.charAt(3)-49),"piece":piece})});
         // bp.sync({request: bp.Event("Database Updated") });
-        bp.sync({request: new Move(new Cell(input.charAt(0)-97,input.charAt(1)-49),new Cell(input.charAt(2)-97,input.charAt(3)-49),piece)},100);
+        bp.sync({request: new Move(new Cell(input.charAt(0)-97,input.charAt(1)-49),new Cell(input.charAt(2)-97,input.charAt(3)-49),piece)});
 
 
     }
@@ -234,8 +236,8 @@ CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
                 start--;
             }
         }
-        var legalMoves = cells.map(c => new Move(rookCell, c, rook));
-        bp.sync({request: [legalMoves[0]],waitFor: bp.Event("Database Updated")});
+        var legalMoves = cells.map(function(c) { return new Move(rookCell, c, rook); });
+        bp.sync({request: legalMoves, waitFor: bp.Event("Database Updated")});
         // bp.sync({request: [legalMoves[0]]});
         // bp.sync({waitFor: bp.Event("Database Updated")});
     }
@@ -597,9 +599,10 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
                 }
             }
         }
-        var legalMoves = cells.map(c => new Move(kingCell, c, king));
+        var legalMoves = cells.map(
+            function(c) { return new Move(kingCell, c, king);});
         bp.log.info("King moves: "+ legalMoves );
-        bp.sync({request: [legalMoves[0]],waitFor: bp.Event("Database Updated")});
+        bp.sync({request: legalMoves,waitFor: bp.Event("Database Updated")});
         // bp.sync({waitFor: bp.Event("Database Updated")});
     }
 });
@@ -622,8 +625,10 @@ function checkifCauseChess(source, target, piece){
        }
        tempPiece.id=1;
        var realPiece=getPiece(tempPiece.color+"_"+tempPiece.type+"_"+tempPiece.id);
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       bp.sync({request:
+               CTX.Transaction(
+                   CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null}),
+                   CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece}))});
        if(myColor.equals(Color.White)) {
            kingCell = getCellWithPiece(whiteKing);
        }
@@ -634,13 +639,17 @@ function checkifCauseChess(source, target, piece){
        if(!kingController(kingCell,myColor)){
            ans=true;
        }
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":realPiece})});
+       bp.sync({request:
+               CTX.Transaction(
+                   CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece}),
+                   CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":realPiece}))});
    }
 
    else{
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null})});
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece})});
+       bp.sync({request:
+               CTX.Transaction(
+                   CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":null}),
+                   CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":piece}))});
        if(myColor.equals(Color.White)) {
            kingCell = getCellWithPiece(whiteKing);
        }
@@ -651,8 +660,10 @@ function checkifCauseChess(source, target, piece){
        if(!kingController(kingCell,myColor)){
             ans=true;
        }
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece})});
-       bp.sync({request: CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":null})});
+       bp.sync({request:
+               CTX.Transaction(
+                   CTX.UpdateEvent("UpdateCell",{"cell":source,"piece":piece}),
+                   CTX.UpdateEvent("UpdateCell",{"cell":target,"piece":null}))});
    }
   bp.log.info("Out Fun");
    return ans;
