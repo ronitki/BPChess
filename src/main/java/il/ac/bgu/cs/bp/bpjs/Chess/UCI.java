@@ -96,6 +96,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
 
     public void newGame() {
         contextService = ContextService.getInstance();
+        contextService.alwaysUpdateEntities();
         this.bprog = contextService.getBProgram();
         contextService.initFromResources("ContextDB", "ContextualChess-Population.js", "ContextualChess.js");
         bprog = contextService.getBProgram();

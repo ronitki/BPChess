@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.github.bThink-BGU.BPjs-Context</groupId>
             <artifactId>BPjs-Context-Core</artifactId>
-            <version>ad3d26c</version>
+            <version>7a56307</version>
         </dependency>
 
         <dependency>
