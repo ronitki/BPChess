@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 
-import static il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator.StringToMove;
+import static il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator.MoveTranslate;
 
 public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private InputStream in;
@@ -72,6 +72,7 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             if (line.startsWith("setoption")) setOptions(line);
             else if ("isready".equals(line)) isReady();
             else if ("ucinewgame".equals(line)) newGame();
+            else if ("stop".equals(line)) newGame();
             else if (line.startsWith("position")) newPosition(line);
             else if (line.startsWith("go"))
                 bprog.enqueueExternalEvent(new BEvent("My Turn"));
@@ -141,8 +142,8 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             }
             input = input.substring(input.length() - 5, input.length() - 1);
             if (input.length() > 0) {
-                bprog.enqueueExternalEvent(new BEvent("HisMove"));
-                bprog.enqueueExternalEvent(new BEvent(input));
+                bprog.enqueueExternalEvent(new BEvent("input-"+ MoveTranslate(input)));
+//                bprog.enqueueExternalEvent(new BEvent(input));
 
             }
         } else {
@@ -260,7 +261,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
         parameters.put("piece", p);
         parameters.put("cell", new Cell(x, y, p));
         bprog.enqueueExternalEvent(new ContextService.UpdateEvent("UpdateCell", parameters));
-        // bprog.enqueueExternalEvent(new ContextService.AnyUpdateContextDBEvent("Cell"));
     }
 
     private int getRow(String line, int index) {

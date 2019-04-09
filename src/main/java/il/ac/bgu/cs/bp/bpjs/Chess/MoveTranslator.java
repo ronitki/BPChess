@@ -19,7 +19,7 @@ public class MoveTranslator {
         return "" + NumberToChar(move.source.i) + (move.source.j+ 1) + NumberToChar(move.target.i) + (move.target.j + 1);
     }
 
-    public static Move StringToMove(String move) {
-        return new Move(new Cell(ChartoNumber(move.charAt(0)), Character.getNumericValue(move.charAt(1)) - 1), new Cell(ChartoNumber(move.charAt(2)), Character.getNumericValue(move.charAt(3)) - 1), new Piece(Color.White, Type.King, 1));
+    public static String MoveTranslate(String move) {
+        return "" + ChartoNumber(move.charAt(0))+ (Character.getNumericValue(move.charAt(1)) - 1) + ChartoNumber(move.charAt(2))+ (Character.getNumericValue(move.charAt(3)) - 1);
     }
 }

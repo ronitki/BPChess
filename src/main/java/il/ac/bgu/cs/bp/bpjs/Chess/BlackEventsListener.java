@@ -24,7 +24,6 @@ public class BlackEventsListener extends BProgramRunnerListenerAdapter {
             Move mv = (Move) theEvent;
             if(mv.piece.color.equals(myColor))
                 uci.sendMove(MoveTranslator.MoveToString(mv));
-                //TODO: update the db about the move selected
         }
     }
 }

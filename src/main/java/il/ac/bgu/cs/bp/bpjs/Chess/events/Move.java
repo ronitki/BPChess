@@ -1,5 +1,6 @@
 package il.ac.bgu.cs.bp.bpjs.Chess.events;
 
+import il.ac.bgu.cs.bp.bpjs.Chess.MoveTranslator;
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.Cell;
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Color;
 import il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece.Piece;
@@ -40,7 +41,8 @@ public class Move extends BEvent {
 
     @Override
     public String toString() {
-        return "Move(" +source.i+","+source.j+")->("+target.i+","+target.j+"),"+ piece ;
+        String move=MoveTranslator.MoveToString(this);
+        return "Move(" +move.charAt(0)+move.charAt(1)+")->("+move.charAt(2)+move.charAt(3)+"),"+ piece ;
     }
 
     public static class AnyMoveEventSet implements EventSet {
@@ -57,6 +59,7 @@ public class Move extends BEvent {
             return bEvent instanceof Move && ((Move)bEvent).source.i==((Move)bEvent).target.i && ((Move)bEvent).source.j==((Move)bEvent).target.j;
         }
     }
+
     public static class OutOfBoardMoveEventSet implements EventSet {
         @Override
         public boolean contains(BEvent bEvent) {
@@ -90,18 +93,29 @@ public class Move extends BEvent {
         }
     }
 
-    public static class EatMoveEventSet implements EventSet {
+    public static class AnnounceEventSet implements EventSet {
 
         @Override
         public boolean contains(BEvent bEvent) {
-            return bEvent instanceof Move && ((Move)bEvent).target.piece!=null;
+            return bEvent.name.equals("EngineTurn") ||bEvent.name.equals("MyTurn") || bEvent.name.equals("Update Ended") ;
+
         }
     }
-    public static class AnyEventSet implements EventSet {
+
+    public static class EngineEventSet implements EventSet {
 
         @Override
         public boolean contains(BEvent bEvent) {
-            return true;
+           return bEvent.name.split("-")[0].equals("input");
+        }
+    }
+
+    public static class ContextEventSet implements EventSet {
+
+        @Override
+        public boolean contains(BEvent bEvent) {
+
+            return bEvent.name.contains("ContextEndedEvent") || bEvent.name.contains("NewContextEvent") ;
         }
     }
 }
