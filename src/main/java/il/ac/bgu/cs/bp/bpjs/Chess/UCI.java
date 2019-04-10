@@ -24,7 +24,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
     private Scanner scanner;
     private PrintWriter logger;
     private boolean wasInitialized = false;
-    private boolean wasInitEnded = false;
     private ContextService contextService;
     private BProgram bprog;
     private BlackEventsListener blackEventsListener;
@@ -116,7 +115,6 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
 
         //restart the main
         wasInitialized = false;
-        wasInitEnded = false;
 
     }
 
@@ -132,29 +130,21 @@ public class UCI extends BProgramRunnerListenerAdapter implements Runnable {
             input = input.substring(4);
             String fenBoard = input.substring(0, input.indexOf(" w"));
             splitFen(fenBoard);
-            // bprog.enqueueExternalEvent(new BEvent("init_end"));
-        }
-
-        if (input.contains("moves")) {
-            if (!wasInitEnded) {
+            if (input.contains("moves")) {
                 bprog.enqueueExternalEvent(new BEvent("color", "black"));
                 blackEventsListener.setColor(Color.Black);
-            }
-            input = input.substring(input.length() - 5, input.length() - 1);
-            if (input.length() > 0) {
-                bprog.enqueueExternalEvent(new BEvent("input-"+ MoveTranslate(input)));
-//                bprog.enqueueExternalEvent(new BEvent(input));
-
-            }
-        } else {
-            if (!wasInitEnded) {
+            } else {
                 bprog.enqueueExternalEvent(new BEvent("color", "white"));
                 blackEventsListener.setColor(Color.White);
             }
-        }
-        if (!wasInitEnded) {
             bprog.enqueueExternalEvent(new BEvent("init_end"));
-            wasInitEnded = true;
+        }
+
+        if (input.contains("moves")) {
+            input = input.substring(input.length() - 5, input.length() - 1);
+            if (input.length() > 0) {
+                bprog.enqueueExternalEvent(new BEvent("input-" + MoveTranslate(input)));
+            }
         }
     }
 

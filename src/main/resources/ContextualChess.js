@@ -1,5 +1,4 @@
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.events);
-
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.context);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema);
 importPackage(Packages.il.ac.bgu.cs.bp.bpjs.Chess.context.schema.piece);
@@ -103,36 +102,47 @@ bp.registerBThread("EnforceTurns", function () {
 });
 
 bp.registerBThread("UpdateBoardOnMove", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         var move = bp.sync({waitFor: Move.AnyMoveEventSet()});
-        bp.sync({request: bp.Event("Update Started")});
+        var target= (Cell)((Move)(move).target);
+        if(isNonEmpty(target)) {
+            bp.sync({request: bp.Event("Update Started-Eat")});
+        }
+        else {
+            bp.sync({request: bp.Event("Update Started-Move")});
+        }
         bp.sync({
             request: CTX.Transaction(
                 CTX.UpdateEvent("UpdateCell", {"cell": move.source, "piece": null}),
                 CTX.UpdateEvent("UpdateCell", {"cell": move.target, "piece": move.piece}))
         });
-        bp.sync({waitFor: bp.Event("All was announced")})
-        bp.sync({request: bp.Event("Database Updated")});
-        //ronit1
     }
 });
-bp.registerBThread("Check announe", function () {
-    bp.sync({waitFor: Move.AnnounceEventSet()});
-    bp.sync({waitFor: Move.AnnounceEventSet()});
-    bp.sync({request: bp.Event("All was announced")})
-});
+
 
 bp.registerBThread("Wait For Database to be updated", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
    while(true) {
-       bp.sync({waitFor: bp.Event("Update Started")});
-       for (var i = 0; i < 9; i++) {
+       var toWait;
+       var i=0;
+       var move=bp.sync({waitFor: [bp.Event("Update Started-Eat"),bp.Event("Update Started-Move")]});
+       if(move.name.equals("Update Started-Eat")){
+           toWait=9;
+       }
+       else{
+           toWait=10;
+       }
+       while(i<toWait){
            bp.sync({waitFor: Move.ContextEventSet()});
+           i++;
        }
        bp.sync({request: bp.Event("Update Ended")});
    }
 });
 
 bp.registerBThread("GetEngineMove", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         var input = bp.sync({waitFor: Move.EngineEventSet()}).name.split("-")[1];
         var i = input.charAt(0) - 48;
@@ -162,32 +172,37 @@ bp.registerBThread("GetMyColor", function () {
 });
 
 bp.registerBThread("block moving to the same place", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
     bp.sync({block: Move.SamePlaceMoveEventSet()});
 });
 
 bp.registerBThread("block out of board moves", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
     bp.sync({block: Move.OutOfBoardMoveEventSet()});
 });
 
 bp.registerBThread("announce engine turn", function () {
     bp.sync({waitFor: bp.Event("Color was updated")});
-    bp.sync({request: bp.Event("init_end")});
+    bp.sync({waitFor: bp.Event("init_end")});
     while(true) {
         bp.sync({waitFor: Move.ColorMoveEventSet(otherColor)});
-        bp.sync({request: bp.Event("EngineTurn")});
+        bp.sync({waitFor: bp.Event("Update Ended")});
+        bp.sync({request: bp.Event("EnginePlayed")});
     }
 });
 bp.registerBThread("announce my turn", function () {
     bp.sync({waitFor: bp.Event("Color was updated")});
-    bp.sync({request: bp.Event("init_end")});
+    bp.sync({waitFor: bp.Event("init_end")});
     while(true) {
         bp.sync({waitFor: Move.ColorMoveEventSet(myColor)});
-        bp.sync({request: bp.Event("MyTurn")});
+        bp.sync({waitFor: bp.Event("Update Ended")});
+        bp.sync({request: bp.Event("My Color Played")});
     }
 
 });
 
 bp.registerBThread("delete piece upon eating", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         var move = bp.sync({waitFor: Move.AnyMoveEventSet()});
         var target= (Cell)((Move)(move).target);
@@ -200,6 +215,7 @@ bp.registerBThread("delete piece upon eating", function () {
 });
 
 CTX.subscribe("Kill piece", "piece", function (p) {
+    bp.sync({waitFor: bp.Event("init_end")});
     bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
     bp.sync({block: Move.PieceMoveEventSet(p)});
 });
@@ -212,6 +228,8 @@ CTX.subscribe("Kill piece", "piece", function (p) {
 CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
     bp.sync({waitFor: bp.Event("Context Population Ended")});
     bp.sync({waitFor: bp.Event("init_end")});
+    if(myColor.equals(Color.Black))
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
     while (true) {
         var rookCell = getCellWithPiece(rook);
         if (rookCell == null) { // If the piece is not on board
@@ -279,8 +297,8 @@ CTX.subscribe("AskMoveForRook", "Rook", function (rook) {
             return new Move(rookCell, c, rook);
         });
         bp.log.info("Rook Legal Moves: "+legalMoves);
-        bp.sync({request: legalMoves,waitFor: bp.Event("EngineTurn")});
-        bp.sync({waitFor: bp.Event("Database Updated")});
+        bp.sync({request: legalMoves, waitFor: bp.Event("My Color Played")});
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
 
     }
 });
@@ -543,6 +561,8 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
     else {
         whiteKing = king;
     }
+    if(myColor.equals(Color.Black))
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
     while (true) {
         var kingCell = getCellWithPiece(king);
         if (kingCell === null)
@@ -562,7 +582,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i - 1, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -572,7 +592,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -582,7 +602,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i + 1, kingCell.j - 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -592,7 +612,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i - 1, kingCell.j);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -603,7 +623,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell)) {
                 cells.push(currentCell);
             }
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -611,9 +631,10 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         }
         if (i - 1 >= 0 && j + 1 < size) {
             currentCell = getCell(kingCell.i - 1, kingCell.j + 1);
-            if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
+            if (kingController(currentCell, currentColor) && checkEmpty(currentCell)) {
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            }
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell) && !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -623,7 +644,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i, kingCell.j + 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -633,7 +654,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             currentCell = getCell(kingCell.i + 1, kingCell.j + 1);
             if (kingController(currentCell, currentColor) && checkEmpty(currentCell))
                 cells.push(currentCell);
-            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)) {
+            else if (kingController(currentCell, currentColor) && !checkEmpty(currentCell)&& !isColor(currentCell,currentColor)) {
                 if (!checkifCauseChess(kingCell, currentCell, king)) {
                     cells.push(currentCell);
                 }
@@ -644,14 +665,14 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
                 return new Move(kingCell, c, king);
             });
         bp.log.info("King moves: " + legalMoves);
-        bp.sync({request: legalMoves,waitFor: bp.Event("EngineTurn")});
-        bp.sync({waitFor: bp.Event("Database Updated")});
+        bp.sync({request: legalMoves, waitFor: bp.Event("My Color Played")});
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
     }
 });
 //#endregion KingBehaviors
 
 function checkifCauseChess(source, target, piece) {
-    bp.log.info("Enter func");
+    // bp.log.info("Enter func");
     return false;
     var ans = false;
     var kingCell;
