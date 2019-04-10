@@ -190,6 +190,7 @@ bp.registerBThread("announce engine turn", function () {
         bp.sync({request: bp.Event("EnginePlayed")});
     }
 });
+
 bp.registerBThread("announce my turn", function () {
     bp.sync({waitFor: bp.Event("Color was updated")});
     bp.sync({waitFor: bp.Event("init_end")});
@@ -219,9 +220,8 @@ CTX.subscribe("Kill piece", "piece", function (p) {
     bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
     bp.sync({block: Move.PieceMoveEventSet(p)});
 });
-//TODO add bt that forbids my moves that will cause chess to me
-//TODO for each piece - add bt that wait for my turn and then blocks all moves that will cause check
 
+//TODO if happened no eventselect && my turn(||go) && chess = math else tie
 //#endregion GameRules
 
 //#region RookBehaviors
@@ -573,7 +573,6 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         var currentCell;
         var currentColor = getMyColor(kingCell);
         if (!kingController(kingCell, currentColor)) {
-            //TODO: call chess event
             bp.sync({request: bp.Event("Chess Event")});
         }
         var i = kingCell.i;
