@@ -22,4 +22,9 @@ public class MoveTranslator {
     public static String MoveTranslate(String move) {
         return "" + ChartoNumber(move.charAt(0))+ (Character.getNumericValue(move.charAt(1)) - 1) + ChartoNumber(move.charAt(2))+ (Character.getNumericValue(move.charAt(3)) - 1);
     }
+
+    public static Move StringToMoveTranslate(String move, Piece p) {
+//        return "" + ChartoNumber(move.charAt(0))+ (Character.getNumericValue(move.charAt(1)) - 1) + ChartoNumber(move.charAt(2))+ (Character.getNumericValue(move.charAt(3)) - 1);
+        return  null;
+    }
 }

@@ -118,4 +118,21 @@ public class Move extends BEvent {
             return bEvent.name.contains("ContextEndedEvent") || bEvent.name.contains("NewContextEvent") ;
         }
     }
+    public static class SpecificMoveEventSet implements EventSet {
+        private final Piece p;
+        private final int i;
+        private final int j;
+
+
+        public SpecificMoveEventSet(Piece p, int i, int j) {
+            this.p = p;
+            this.i = i;
+            this.j = j;
+        }
+
+        @Override
+        public boolean contains(BEvent bEvent) {
+            return bEvent instanceof Move && ((Move)bEvent).piece.equals(p) && ((Move)bEvent).target.i==i && ((Move)bEvent).target.j==j;
+        }
+    }
 }
