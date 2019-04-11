@@ -519,8 +519,8 @@ function calculateRookStrategy(legalmoves){
 function checkRight(cell, color) {
     for (var i = cell.i + 1; i < size; i++) {
         var currentCell = getCell(i, cell.j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color) || (isType(currentCell, Type.King)&&isColor(currentCell, color)) ) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color) ) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -539,8 +539,8 @@ function checkRight(cell, color) {
 function checkLeft(cell, color) {
     for (var i = cell.i - 1; i >= 0; i--) {
         var currentCell = getCell(i, cell.j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell) && !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -559,8 +559,8 @@ function checkLeft(cell, color) {
 function checkUp(cell, color) {
     for (var j = cell.j + 1; j < size; j++) {
         var currentCell = getCell(cell.i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -579,8 +579,8 @@ function checkUp(cell, color) {
 function checkDown(cell, color) {
     for (var j = cell.j - 1; j >= 0; j--) {
         var currentCell = getCell(cell.i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Rook) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -599,8 +599,8 @@ function checkDown(cell, color) {
 function checkUpRight(cell, color) {
     for (var i = cell.i + 1, j = cell.j + 1; j < size && i < size; j++, i++) {
         var currentCell = getCell(i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -624,8 +624,8 @@ function checkUpRight(cell, color) {
 function checkUpLeft(cell, color) {
     for (var i = cell.i - 1, j = cell.j + 1; j < size && i >= 0; j++, i--) {
         var currentCell = getCell(i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -649,8 +649,8 @@ function checkUpLeft(cell, color) {
 function checkDownRight(cell, color) {
     for (var i = cell.i + 1, j = cell.j - 1; j >= 0 && i < size; j--, i++) {
         var currentCell = getCell(i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
@@ -674,8 +674,8 @@ function checkDownRight(cell, color) {
 function checkDownLeft(cell, color) {
     for (var i = cell.i - 1, j = cell.j - 1; j >= 0 && i >= 0; j--, i--) {
         var currentCell = getCell(i, j);
-        if (isNonEmpty(currentCell)) { //there's someone in the cell
-            if (!isColor(currentCell, color)|| (isType(currentCell, Type.King)&&isColor(currentCell, color))) { // the piece is enemy piece
+        if (isNonEmpty(currentCell)&& !(isType(currentCell, Type.King)&&isColor(currentCell, color))) { //there's someone in the cell
+            if (!isColor(currentCell, color)) { // the piece is enemy piece
                 if (isType(currentCell, Type.Bishop) || isType(currentCell, Type.Queen)) {
                     return true;
                 }
