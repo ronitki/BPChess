@@ -167,6 +167,7 @@ function isRookNearToTheKing(rook) {
     var enemyKing = getKingCell(true);
     var colDistance = Math.abs(rook.i - enemyKing.i);
     var rowDistance = Math.abs(rook.j - enemyKing.j);
+
     if (colDistance === 1 || rowDistance === 1) {
         return true;
     }
@@ -357,7 +358,15 @@ CTX.subscribe("AnnounceNearToTheKing", "Rook", function (rook) {
         bp.sync({waitFor: bp.Event("EnginePlayed")});
     bp.sync({waitFor: bp.Event("Direction was updated")});
     while (true) {
-        if (isRookNearToTheKing(rook)) {
+
+        var rookCell=getCellWithPiece(rook);
+        if (rookCell == null) { // If the piece is not on board
+            break;
+        }
+        if (isColor(rookCell, otherColor)) {
+            break;
+        }
+        if (isRookNearToTheKing(rookCell)) {
             bp.sync({request: bp.Event("The rook is near")});
         }
         bp.sync({waitFor: bp.Event("EnginePlayed")});
@@ -507,6 +516,7 @@ CTX.subscribe("AskRookToChess", "Rook", function (rook) {
         bp.sync({waitFor: bp.Event("EnginePlayed")});
     bp.sync({waitFor: bp.Event("Direction was updated")});
     while (true) {
+        bp.sync({waitFor: bp.Event("Kings are opposite")});
         var move;
         var rookCell = getCellWithPiece(rook);
         if (rookCell == null) { // If the piece is not on board
@@ -515,7 +525,6 @@ CTX.subscribe("AskRookToChess", "Rook", function (rook) {
         if (isColor(rookCell, otherColor)) {
             break;
         }
-        bp.sync({waitFor: bp.Event("Kings are opposite")});
         var enemyKing = getKingCell(true);
         if (bestDirection === ("right") || bestDirection === ("left")) {
             bp.sync({
@@ -937,25 +946,25 @@ CTX.subscribe("BlockKingGoingToTheBeforeLastOneRow", "King", function (king) {
         }
         var movesToBlock = [];
         if (enemyKing.i === 0) {
-            movesToBlock = getCell(1, kingCell.j);
+            movesToBlock.push(getCell(1, kingCell.j));
             if (kingCell.j > 0) {
-                movesToBlock = getCell(1, kingCell.j - 1);
+                movesToBlock.push(getCell(1, kingCell.j - 1));
             }
             if (kingCell.j < size - 1) {
-                movesToBlock = getCell(1, kingCell.j + 1);
+                movesToBlock.push(getCell(1, kingCell.j + 1));
             }
         }
         if (enemyKing.i === 7) {
-            movesToBlock = getCell(6, kingCell.j);
+            movesToBlock.push(getCell(6, kingCell.j));
             if (kingCell.j > 0) {
-                movesToBlock = getCell(6, kingCell.j - 1);
+                movesToBlock.push(getCell(6, kingCell.j - 1));
             }
             if (kingCell.j < size - 1) {
-                movesToBlock = getCell(6, kingCell.j + 1);
+                movesToBlock.push(getCell(6, kingCell.j + 1));
             }
         }
         if (enemyKing.j === 0) {
-            movesToBlock = getCell(kingCell.i, 1);
+            movesToBlock.push(getCell(kingCell.i, 1));
             if (kingCell.i < size - 1) {
                 movesToBlock.push(getCell(kingCell.i + 1, 1));
             }
@@ -964,7 +973,7 @@ CTX.subscribe("BlockKingGoingToTheBeforeLastOneRow", "King", function (king) {
             }
         }
         if (enemyKing.i === 7) {
-            movesToBlock = getCell(kingCell.i, 6);
+            movesToBlock.push(getCell(kingCell.i, 6));
             if (kingCell.i < size - 1) {
                 movesToBlock.push(getCell(kingCell.i + 1, 6));
             }
@@ -972,7 +981,6 @@ CTX.subscribe("BlockKingGoingToTheBeforeLastOneRow", "King", function (king) {
                 movesToBlock.push(getCell(kingCell.i - 1, 6));
             }
         }
-        bp.log.info("The Moves TO Block: "+movesToBlock);
         var illegalMovesToBlock = movesToBlock.map(function (c) {
             return new Move(kingCell, c, king);
         });
@@ -981,54 +989,6 @@ CTX.subscribe("BlockKingGoingToTheBeforeLastOneRow", "King", function (king) {
     }
 });
 
-// CTX.subscribe("AskKingToBeNear", "King", function (king) {
-//     bp.sync({waitFor: bp.Event("Context Population Ended")});
-//     bp.sync({waitFor: bp.Event("init_end")});
-//     if (myColor.equals(Color.Black))
-//         bp.sync({waitFor: bp.Event("EnginePlayed")});
-//     bp.sync({waitFor: bp.Event("Direction was updated")});
-//     while (true) {
-//         // bp.sync({waitFor: bp.Event("The rook is near")});
-//         var kingCell = getCellWithPiece(king);
-//         if (kingCell == null) { // If the piece is not on board
-//             break;
-//         }
-//         if (isColor(kingCell, otherColor)) {
-//             break;
-//         }
-//         var legalMoves = [];
-//         if (kingCell.i > 0) {
-//             legalMoves = getCell(kingCell.i - 1, kingCell.j);
-//             if (kingCell.j > 0) {
-//                 legalMoves = getCell(kingCell.i - 1, kingCell.j - 1);
-//             }
-//             if (kingCell.j < size - 1) {
-//                 legalMoves = getCell(kingCell.i - 1, kingCell.j + 1);
-//             }
-//         }
-//         if (kingCell.i < size - 1) {
-//             legalMoves = getCell(kingCell.i + 1, kingCell.j);
-//             if (kingCell.j > 0) {
-//                 legalMoves = getCell(kingCell.i + 1, kingCell.j - 1);
-//             }
-//             if (kingCell.j < size - 1) {
-//                 legalMoves = getCell(kingCell.i + 1, kingCell.j + 1);
-//             }
-//         }
-//         if (kingCell.j > 0) {
-//             legalMoves = getCell(kingCell.i, kingCell.j - 1);
-//         }
-//         if (kingCell.j < size - 1) {
-//             legalMoves = getCell(kingCell.i, kingCell.j + 1);
-//         }
-//         var legalMovesToRequest = legalMoves.map(
-//             function (c) {
-//                 return new Move(kingCell, c, king);
-//             });
-//         bp.sync({request: legalMovesToRequest, waitFor: bp.Event("My Color Played")}, 90);
-//         bp.sync({waitFor: bp.Event("EnginePlayed")});
-//     }
-// });
 //#endregion KRK Strategy
 
 //#region RookBehaviors
@@ -1208,6 +1168,92 @@ CTX.subscribe("BlockMovesCauseChessForRook", "Rook", function (rook) {
         });
         bp.sync({block: illegalMovesToBlock, waitFor: bp.Event("My Color Played")});
         bp.sync({waitFor: bp.Event("EnginePlayed")});
+    }
+});
+
+CTX.subscribe("BlockillegalMovesForRook", "Rook", function (rook) {
+    bp.sync({waitFor: bp.Event("Context Population Ended")});
+    bp.sync({waitFor: bp.Event("init_end")});
+    if (myColor.equals(Color.Black))
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
+    while (true) {
+        var rookCell = getCellWithPiece(rook);
+        if (rookCell == null) { // If the piece is not on board
+            break;
+        }
+        if (isColor(rookCell, otherColor)) {
+            break;
+        }
+        var illegalMoves = [];
+        //right
+        for (var i = rookCell.i + 1; i < size; i++) {
+            var c = getCell(i, rookCell.j);
+            if (isNonEmpty(c)) {
+                if (!isColor(c, getOppositeColor(rookCell))) {
+                    illegalMoves.push(c);
+                }
+                i++;
+                while(i<size) {
+                    illegalMoves.push(getCell(i, rookCell.j));
+                    i++;
+                }
+            }
+
+
+        }
+        //left
+        for (var i = rookCell.i - 1; i >= 0; i--) {
+            var c = getCell(i, rookCell.j);
+            if (isNonEmpty(c)) {
+                if (!isColor(c, getOppositeColor(rookCell))) {
+                    illegalMoves.push(c);
+                }
+                i--;
+                while(i>=0) {
+                    illegalMoves.push(getCell(i, rookCell.j));
+                    i--;
+                }
+            }
+
+        }
+        //up
+        for (var j = rookCell.j + 1; j < size; j++) {
+            var c = getCell(rookCell.i, j);
+
+            if (isNonEmpty(c)) {
+                if (!isColor(c, getOppositeColor(rookCell))) {
+                    illegalMoves.push(c);
+                }
+                j++;
+                while(j<size) {
+                    illegalMoves.push(getCell(rookCell.i, j));
+                    j++;
+                }
+            }
+        }
+        //down
+        for (var j = rookCell.j - 1; j >= 0; j--) {
+            var c = getCell(rookCell.i, j);
+            if (isNonEmpty(c)) {
+                if (!isColor(c, getOppositeColor(rookCell))) {
+                    illegalMoves.push(c);
+                }
+                j--;
+                while(j>=0) {
+                    illegalMoves.push(getCell(rookCell.i, j));
+                    j--;
+                }
+            }
+        }
+
+
+        var illegalMovesToBlock = illegalMoves.map(function (c) {
+            return new Move(rookCell, c, rook);
+        });
+
+        bp.sync({block: illegalMovesToBlock, waitFor: bp.Event("My Color Played")});
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
+
     }
 });
 //#endregion RookBehaviors
@@ -1561,11 +1607,14 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
             function (c) {
                 return new Move(kingCell, c, king);
             });
-        bp.sync({request: legalMoves, waitFor: bp.Event("My Color Played")}, 90);
+        bp.log.info("kings legal:"+ legalMoves);
+        bp.sync({
+            request: legalMoves,
+            waitFor: bp.Event("My Color Played")
+        }, 90);
         bp.sync({waitFor: bp.Event("EnginePlayed")});
     }
 });
-
 
 //#endregion KingBehaviors
 
