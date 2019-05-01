@@ -753,8 +753,8 @@ CTX.subscribe("BlockKingFromLeavingTheRookUndefended", "King", function (king) {
             break;
         }
         var movesToBlock = [];
-        if (Math.abs(targetCell.i - enemyKingCell.i) <= 1 && Math.abs(targetCell.j - enemyKingCell.j) <= 1) {
-            if (Math.abs(targetCell.i - myKingCell.i) <= 1 && Math.abs(targetCell.j - myKingCell.j) <= 1) {
+        if (Math.abs(myRook.i - enemyKing.i) <= 1 && Math.abs(myRook.j - enemyKing.j) <= 1) {
+            if (Math.abs(myRook.i - kingCell.i) <= 1 && Math.abs(myRook.j - kingCell.j) <= 1) {
                 bp.sync({block: Move.PieceMoveEventSet(king), waitFor: bp.Event("My Color Played")});
             }
         }
@@ -937,17 +937,47 @@ CTX.subscribe("BlockKingGoingToTheBeforeLastOneRow", "King", function (king) {
         }
         var movesToBlock = [];
         if (enemyKing.i === 0) {
-            //block i==1
+            movesToBlock = getCell(1, kingCell.j);
+            if (kingCell.j > 0) {
+                movesToBlock = getCell(1, kingCell.j - 1);
+            }
+            if (kingCell.j < size - 1) {
+                movesToBlock = getCell(1, kingCell.j + 1);
+            }
         }
-        else if (enemyKing.i === 7) {
-            //block i==6
+        if (enemyKing.i === 7) {
+            movesToBlock = getCell(6, kingCell.j);
+            if (kingCell.j > 0) {
+                movesToBlock = getCell(6, kingCell.j - 1);
+            }
+            if (kingCell.j < size - 1) {
+                movesToBlock = getCell(6, kingCell.j + 1);
+            }
         }
-        else if (enemyKing.j === 0) {
-            //block j==1
+        if (enemyKing.j === 0) {
+            movesToBlock = getCell(kingCell.i, 1);
+            if (kingCell.i < size - 1) {
+                movesToBlock.push(getCell(kingCell.i + 1, 1));
+            }
+            if (kingCell.i > 0) {
+                movesToBlock.push(getCell(kingCell.i - 1, 1));
+            }
         }
-        else if (enemyKing.i === 7) {
-            //block j==6
+        if (enemyKing.i === 7) {
+            movesToBlock = getCell(kingCell.i, 6);
+            if (kingCell.i < size - 1) {
+                movesToBlock.push(getCell(kingCell.i + 1, 6));
+            }
+            if (kingCell.i > 0) {
+                movesToBlock.push(getCell(kingCell.i - 1, 6));
+            }
         }
+        bp.log.info("The Moves TO Block: "+movesToBlock);
+        var illegalMovesToBlock = movesToBlock.map(function (c) {
+            return new Move(kingCell, c, king);
+        });
+        bp.sync({block: illegalMovesToBlock, waitFor: bp.Event("My Color Played")});
+        bp.sync({waitFor: bp.Event("EnginePlayed")});
     }
 });
 
@@ -1447,6 +1477,7 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
     if (myColor.equals(Color.Black))
         bp.sync({waitFor: bp.Event("EnginePlayed")});
     while (true) {
+        bp.sync({waitFor: bp.Event("The rook is near")});
         var kingCell = getCellWithPiece(king);
         if (kingCell === null)
             break;
