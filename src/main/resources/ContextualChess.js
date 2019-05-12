@@ -1297,7 +1297,7 @@ CTX.subscribe("AskKingToCloseOnTheEnemt", "King", function (king) {
         bp.sync({waitFor: bp.Event("EnginePlayed")});
     }
 });
-
+//1
 //#endregion KRK King Strategy
 
 //#region RookBehaviors
