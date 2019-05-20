@@ -419,7 +419,7 @@ bp.registerBThread("DetectKRKStrategy", function () {
 });
 
 //#endregion KRK Strategy
-
+//
 //#region KRK Rook Strategy
 
 //Wait until the rook is in position
