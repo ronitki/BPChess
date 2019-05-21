@@ -10,12 +10,14 @@ var whiteKing;
 var bestDirection;
 
 //#region HELP FUNCTIONS
+//get a specific cell
 function getCell(i, j) {
     if (i >= 0 && i < size && j >= 0 && j < size)
         return CTX.getContextsOfType("Cell(" + i + "," + j + ")").get(0);
     else
         return "null";
 }
+//get a cell with piece p
 function getCellWithPiece(p) {
     try {
         return CTX.getContextsOfType("CellWithPiece(" + p + ")").get(0);
@@ -23,6 +25,7 @@ function getCellWithPiece(p) {
         return null;
     }
 }
+//get piece p
 function getPiece(p) {
     try {
         return CTX.getContextsOfType("SpecificPiece(" + p + ")").get(0);
@@ -30,6 +33,7 @@ function getPiece(p) {
         return null;
     }
 }
+//get all cells with color c
 function getCellWithColor(c) {
     try {
         return CTX.getContextsOfType("CellWithColor(" + c + ")");
@@ -37,6 +41,7 @@ function getCellWithColor(c) {
         return null;
     }
 }
+//get all cells with type t
 function getCellWithType(t) {
     try {
         return CTX.getContextsOfType("CellWithType(" + t + ")");
@@ -44,6 +49,7 @@ function getCellWithType(t) {
         return null;
     }
 }
+//get all non empty cells
 function getNonEmpty() {
     try {
         return CTX.getContextsOfType("NonEmptyCell");
@@ -51,15 +57,23 @@ function getNonEmpty() {
         return null;
     }
 }
+//check if cell is not empty
 function isNonEmpty(cell) {
     return getNonEmpty().contains(cell);
 }
+//check if cell is of type
 function isType(cell, type) {
     return getCellWithType(type).contains(cell);
 }
+//check is cell is of color
 function isColor(cell, color) {
     return getCellWithColor(color).contains(cell);
 }
+//translate number glitch
+function translateChar (num){
+    return num-48;
+}
+//get piece object from cell
 function getRealPiece(cell) {
     var piece = {};
     if (getCellWithType(Type.King).contains(cell)) {
@@ -80,19 +94,17 @@ function getRealPiece(cell) {
     piece.id = 1;
     return getPiece(piece.color + "_" + piece.type + "_" + piece.id);
 }
+//get cell's opposite color
 function getOppositeColor(cell) {
-
     if (getCellWithColor(Color.Black).contains(cell))
         return Color.White;
     return Color.Black;
-
 }
+//
 function getMyColor(cell) {
-
     if (getCellWithColor(Color.Black).contains(cell))
         return Color.Black;
     return Color.White;
-
 }
 function getKingCell(isEnemy) {
     var KingCell;
@@ -213,14 +225,12 @@ function isInDirection(cell1) {
     return false;
 }
 function DetectKRKEndGame() {
-
     if (getCellWithColor(otherColor).size() > 1)
         return false;
     if (getCellWithColor(myColor).size() !== 2)
         return false;
     if (junctionList(getCellWithColor(myColor), getCellWithType(Type.Rook)).length !== 1)
         return false;
-
 
     return true;
 
@@ -229,14 +239,8 @@ function DetectKRKEndGame() {
 //#endregion HELP FUNCTIONS
 
 //#region GameRules
-bp.registerBThread("EnforceTurns", function () {
-    while (true) {
-        bp.sync({waitFor: Move.ColorMoveEventSet(Color.White), block: Move.ColorMoveEventSet(Color.Black)});
-        bp.sync({waitFor: Move.ColorMoveEventSet(Color.Black), block: Move.ColorMoveEventSet(Color.White)});
-    }
-});
 
-bp.registerBThread("EnforceUpdateAfterMove", function () {
+bp.registerBThread("EnforceTurns", function () {
     bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         bp.sync({waitFor: Move.ColorMoveEventSet(Color.White), block: Move.ColorMoveEventSet(Color.Black)});
@@ -260,7 +264,6 @@ bp.registerBThread("UpdateBoardOnMove", function () {
                 CTX.UpdateEvent("UpdateCell", {"cell": move.source, "piece": null}),
                 CTX.UpdateEvent("UpdateCell", {"cell": move.target, "piece": move.piece}))
         });
-
     }
 });
 
@@ -288,11 +291,11 @@ bp.registerBThread("GetEngineMove", function () {
     bp.sync({waitFor: bp.Event("init_end")});
     while (true) {
         var input = bp.sync({waitFor: Move.EngineEventSet()}).name.split("-")[1];
-        var i = input.charAt(0) - 48;
-        var j = input.charAt(1) - 48;
+        var i = translateChar(input.charAt(0));
+        var j = translateChar(input.charAt(1));
         var cell = getCell(i, j);
         var piece = getRealPiece(cell);
-        bp.sync({request: new Move(new Cell(i, j), new Cell(input.charAt(2) - 48, input.charAt(3) - 48), piece)});
+        bp.sync({request: new Move(new Cell(i, j), new Cell(translateChar(input.charAt(2)), translateChar(input.charAt(3))), piece)});
     }
 });
 
@@ -357,26 +360,12 @@ bp.registerBThread("delete piece upon eating", function () {
     }
 });
 
-bp.registerBThread("Block Rook When Check", function () {
-    bp.sync({waitFor: bp.Event("init_end")});
-    while (true) {
-        bp.sync({waitFor: bp.Event("Chess Event")});
-        var enemies = getCellWithColor(myColor);
-        var rooks = getCellWithType(Type.Rook);
-        var enemyRooks = junctionList(enemies, rooks);
-        for (var i = 0; i < enemyRooks.length; i++) {
-            bp.sync({block: Move.PieceMoveEventSet(getRealPiece(enemyRooks[i])), waitFor: Move.AnyMoveEventSet()});
-        }
-    }
-});
-
 CTX.subscribe("Kill piece", "piece", function (p) {
     bp.sync({waitFor: bp.Event("init_end")});
     bp.sync({waitFor: CTX.ContextEndedEvent("Piece", p)});
     bp.sync({block: Move.PieceMoveEventSet(p)});
 });
 
-//TODO if happened no eventselect && my turn(||go) && chess = math else tie
 //#endregion GameRules
 
 //#region KRK Strategy
@@ -419,7 +408,7 @@ bp.registerBThread("DetectKRKStrategy", function () {
 });
 
 //#endregion KRK Strategy
-//
+
 //#region KRK Rook Strategy
 
 //Wait until the rook is in position
@@ -820,7 +809,90 @@ CTX.subscribe("DetectRookInDanger", "Rook", function (rook) {
 
 //#region KRK King Strategy
 
-//wait until the king is in posiion
+function requestKingsCorners(kingCell, enemyKing) {
+    var requests = [];
+    if (bestDirection === ("right")) {
+
+        if (kingCell.j < enemyKing.j) {
+            requests.push(getCell(kingCell.i, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j));
+        }
+        else if (kingCell.j > enemyKing.j) {
+            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
+            requests.push(getCell(kingCell.i, kingCell.j - 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j));
+        }
+        else {
+            requests.push(getCell(kingCell.i + 1, kingCell.j));
+            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
+        }
+    }
+
+    else if (bestDirection === ("left")) {
+        if (kingCell.j < enemyKing.j) {
+            requests.push(getCell(kingCell.i, kingCell.j + 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j));
+        }
+        else if (kingCell.j > enemyKing.j) {
+            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
+            requests.push(getCell(kingCell.i, kingCell.j - 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j));
+        }
+        else {
+            requests.push(getCell(kingCell.i - 1, kingCell.j));
+            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
+        }
+
+    }
+    else if (bestDirection === ("down")) {
+        if (kingCell.i < enemyKing.i) {
+            requests.push(getCell(kingCell.i, kingCell.j - 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j));
+        }
+        else if (kingCell.i > enemyKing.i) {
+            requests.push(getCell(kingCell.i - 1, kingCell.j));
+            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
+            requests.push(getCell(kingCell.i, kingCell.j - 1));
+        }
+        else {
+            requests.push(getCell(kingCell.i, kingCell.j - 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
+        }
+    }
+
+    else if (bestDirection === ("up")) {
+        if (kingCell.i < enemyKing.i) {
+            requests.push(getCell(kingCell.i, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j));
+        }
+        else if (kingCell.i > enemyKing.i) {
+            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j));
+            requests.push(getCell(kingCell.i, kingCell.j + 1));
+        }
+        else {
+            requests.push(getCell(kingCell.i, kingCell.j + 1));
+            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
+            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
+        }
+    }
+    var ans = [];
+    for (var i = 0; i < requests.length; i++) {
+        if (requests[i] !== "null")
+            ans.push(requests[i]);
+    }
+
+    return ans;
+}
+
+//wait until the king is in position
 CTX.subscribe("WaitForKingInDirection", "King", function (king) {
     bp.sync({waitFor: bp.Event("Context Population Ended")});
     bp.sync({waitFor: bp.Event("init_end")});
@@ -1157,6 +1229,19 @@ CTX.subscribe("AskKingToCloseOnTheEnemt", "King", function (king) {
 //#endregion KRK King Strategy
 
 //#region RookBehaviors
+bp.registerBThread("Block Rook When Check", function () {
+    bp.sync({waitFor: bp.Event("init_end")});
+    while (true) {
+        bp.sync({waitFor: bp.Event("Chess Event")});
+        var enemies = getCellWithColor(myColor);
+        var rooks = getCellWithType(Type.Rook);
+        var enemyRooks = junctionList(enemies, rooks);
+        for (var i = 0; i < enemyRooks.length; i++) {
+            bp.sync({block: Move.PieceMoveEventSet(getRealPiece(enemyRooks[i])), waitFor: Move.AnyMoveEventSet()});
+        }
+    }
+});
+
 CTX.subscribe("AskLegalMovesForRook", "Rook", function (rook) {
     bp.sync({waitFor: bp.Event("Context Population Ended")});
     bp.sync({waitFor: bp.Event("init_end")});
@@ -1219,7 +1304,6 @@ CTX.subscribe("AskLegalMovesForRook", "Rook", function (rook) {
             cells.push(c);
         }
 
-
         var legalMoves = cells.map(function (c) {
             return new Move(rookCell, c, rook);
         });
@@ -1250,7 +1334,6 @@ CTX.subscribe("BlockMovesCauseChessForRook", "Rook", function (rook) {
         var bishops = getCellWithType(Type.Bishop);
         var enemyRooks = junctionList(enemies, rooks);
         var enemyQueen = junctionList(enemies, queens)[0];
-
         var enemyBishops = junctionList(enemies, bishops);
         var illegalMoves = [];
         //rook
@@ -1364,7 +1447,6 @@ CTX.subscribe("BlockillegalMovesForRook", "Rook", function (rook) {
                 }
             }
 
-
         }
         //left
         for (var i = rookCell.i - 1; i >= 0; i--) {
@@ -1410,7 +1492,6 @@ CTX.subscribe("BlockillegalMovesForRook", "Rook", function (rook) {
                 }
             }
         }
-
 
         var illegalMovesToBlock = illegalMoves.map(function (c) {
             return new Move(rookCell, c, rook);
@@ -1623,95 +1704,8 @@ function checkKnights(cell, color) {
     return false;
 }
 
-function checkEmpty(cell) {
-    return !isNonEmpty(cell);
-}
-
 function kingController(currentCell, currentColor) {
     return (!checkRight(currentCell, currentColor) && !checkLeft(currentCell, currentColor) && !checkUp(currentCell, currentColor) && !checkDown(currentCell, currentColor) && !checkUpLeft(currentCell, currentColor) && !checkUpRight(currentCell, currentColor) && !checkDownLeft(currentCell, currentColor) && !checkDownRight(currentCell, currentColor) && !checkKnights(currentCell, currentColor));
-}
-
-function requestKingsCorners(kingCell, enemyKing) {
-    var requests = [];
-    if (bestDirection === ("right")) {
-
-        if (kingCell.j < enemyKing.j) {
-            requests.push(getCell(kingCell.i, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j));
-        }
-        else if (kingCell.j > enemyKing.j) {
-            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
-            requests.push(getCell(kingCell.i, kingCell.j - 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j));
-        }
-        else {
-            requests.push(getCell(kingCell.i + 1, kingCell.j));
-            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
-        }
-    }
-
-    else if (bestDirection === ("left")) {
-        if (kingCell.j < enemyKing.j) {
-            requests.push(getCell(kingCell.i, kingCell.j + 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j));
-        }
-        else if (kingCell.j > enemyKing.j) {
-            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
-            requests.push(getCell(kingCell.i, kingCell.j - 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j));
-        }
-        else {
-            requests.push(getCell(kingCell.i - 1, kingCell.j));
-            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
-        }
-
-    }
-    else if (bestDirection === ("down")) {
-        if (kingCell.i < enemyKing.i) {
-            requests.push(getCell(kingCell.i, kingCell.j - 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j));
-        }
-        else if (kingCell.i > enemyKing.i) {
-            requests.push(getCell(kingCell.i - 1, kingCell.j));
-            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
-            requests.push(getCell(kingCell.i, kingCell.j - 1));
-        }
-        else {
-            requests.push(getCell(kingCell.i, kingCell.j - 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j - 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j - 1));
-        }
-    }
-
-    else if (bestDirection === ("up")) {
-        if (kingCell.i < enemyKing.i) {
-            requests.push(getCell(kingCell.i, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j));
-        }
-        else if (kingCell.i > enemyKing.i) {
-            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j));
-            requests.push(getCell(kingCell.i, kingCell.j + 1));
-        }
-        else {
-            requests.push(getCell(kingCell.i, kingCell.j + 1));
-            requests.push(getCell(kingCell.i + 1, kingCell.j + 1));
-            requests.push(getCell(kingCell.i - 1, kingCell.j + 1));
-        }
-    }
-    var ans = [];
-    for (var i = 0; i < requests.length; i++) {
-        if (requests[i] !== "null")
-            ans.push(requests[i]);
-    }
-
-    return ans;
 }
 
 //#endregion King Help Function
@@ -1738,10 +1732,6 @@ CTX.subscribe("AskMoveForKing", "King", function (king) {
         var cells = [];
         var currentCell;
         var currentColor = getMyColor(kingCell);
-        if (!kingController(kingCell, currentColor)) {
-            bp.sync({request: bp.Event("Chess Event")});
-        }
-
         cells.push(getCell(kingCell.i - 1, kingCell.j - 1));
         cells.push(getCell(kingCell.i, kingCell.j - 1));
         cells.push(getCell(kingCell.i + 1, kingCell.j - 1));
@@ -1797,7 +1787,7 @@ CTX.subscribe("BlockIllegalMoveForKing", "King", function (king) {
 
         var IllegalcellsToBlock = cellsToBlock.map(
             function (c) {
-                if ((c !== "null") && (!kingController(c, currentColor) || (!checkEmpty(c) && isColor(c, currentColor))))
+                if ((c !== "null") && (!kingController(c, currentColor) || (isNonEmpty(c) && isColor(c, currentColor))))
                     return new Move(kingCell, c, king);
             });
         var _IllegalcellsToBlock = IllegalcellsToBlock.filter(function (c) {
@@ -1827,7 +1817,7 @@ CTX.subscribe("DetectChess", "King", function (king) {
         if (isColor(kingCell, otherColor))
             break;
         var cells = [];
-        var currentCell;
+
         var currentColor = getMyColor(kingCell);
         if (!kingController(kingCell, currentColor)) {
             bp.sync({request: bp.Event("Chess Event"), waitFor: bp.Event("My Color Played")});
